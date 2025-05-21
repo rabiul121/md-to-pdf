@@ -1,0 +1,43 @@
+name: Convert Markdown to PDF
+
+on:
+  push:
+    paths:
+      - 'Mobile Servicing Training.md'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  convert_md_to_pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies for PDF conversion
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji fonts-noto
+          npm install -g md-to-pdf
+
+      - name: Convert Markdown to PDF
+        run: |
+          md-to-pdf "Mobile Servicing Training.md" --config-file pdf-config.json
+
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobile-servicing-training-pdf
+          path: "Mobile Servicing Training.pdf"
+          
+      - name: Commit and push PDF
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "Mobile Servicing Training.pdf"
+          git commit -m "Generate PDF from Markdown" || echo "No changes to commit"
+          git push

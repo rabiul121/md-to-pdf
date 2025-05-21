@@ -1,0 +1,12 @@
+{
+  "stylesheet": [
+    "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"
+  ],
+  "css": "body { font-family: 'Noto Sans', 'Noto Sans Bengali', sans-serif; } .markdown-body { max-width: 800px; margin: 0 auto; padding: 20px; }",
+  "pdf_options": {
+    "format": "A4",
+    "margin": "20mm",
+    "printBackground": true
+  },
+  "stylesheet_encoding": "utf-8"
+}
