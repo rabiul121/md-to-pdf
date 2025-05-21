@@ -17,10 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Pandoc, LuaLaTeX, and Fonts
+      - name: Install Pandoc, LuaLaTeX, and fonts (minimal)
         run: |
           sudo apt update
-          sudo apt install -y pandoc texlive-luatex fonts-noto
+          sudo apt install -y pandoc lualatex \
+            texlive-luatex texlive-fonts-recommended \
+            texlive-latex-recommended texlive-latex-extra \
+            fonts-noto
 
       - name: Sanitize Markdown input
         run: |
