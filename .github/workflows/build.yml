@@ -17,20 +17,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Pandoc, XeLaTeX, and Fonts
+      - name: Install Pandoc, LuaLaTeX, and Fonts
         run: |
           sudo apt update
-          sudo apt install -y pandoc texlive-xetex fonts-noto
+          sudo apt install -y pandoc texlive-luatex fonts-noto
 
       - name: Sanitize Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF using Noto fonts
+      - name: Convert Markdown to PDF with automatic font fallback
         run: |
           pandoc "clean.md" -o training_output.pdf \
-            --pdf-engine=xelatex \
+            --pdf-engine=lualatex \
             -V mainfont="Noto Sans" \
+            -V fallbackfont="Noto Serif Bengali" \
             -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
