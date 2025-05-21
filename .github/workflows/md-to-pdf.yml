@@ -1,9 +1,10 @@
-name: Convert Markdown to PDF
+name: Convert Markdown to PDF with Pandoc
 
 on:
   push:
     paths:
       - 'Mobile Servicing Training.md'
+      - 'template.tex'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -13,27 +14,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Pandoc
+        uses: r-lib/actions/setup-pandoc@v2
         with:
-          node-version: '18'
+          pandoc-version: '3.1.1'
 
-      - name: Install dependencies for PDF conversion
+      - name: Setup TeX Live
+        uses: xu-cheng/texlive-action/full@v1
+        with:
+          packages: >-
+            xetex
+            fontspec
+            polyglossia
+            unicode-math
+            hyperref
+
+      - name: Install fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji fonts-noto
-          npm install -g md-to-pdf
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji fonts-noto fonts-lohit-beng-bengali
 
-      - name: Convert Markdown to PDF
+      - name: Convert with Pandoc
         run: |
-          md-to-pdf "Mobile Servicing Training.md" --config-file pdf-config.json
+          pandoc "Mobile Servicing Training.md" \
+            --pdf-engine=xelatex \
+            --template=template.tex \
+            -V mainfont="Noto Sans" \
+            -V sansfont="Noto Sans" \
+            -V monofont="Noto Sans Mono" \
+            -V fontenc=T1 \
+            -V documentclass=article \
+            -V papersize=a4 \
+            -V geometry:margin=2.5cm \
+            -o "Mobile Servicing Training.pdf"
 
       - name: Upload PDF file
         uses: actions/upload-artifact@v4
         with:
           name: mobile-servicing-training-pdf
           path: "Mobile Servicing Training.pdf"
-          
+
       - name: Commit and push PDF
         run: |
           git config --local user.email "action@github.com"
