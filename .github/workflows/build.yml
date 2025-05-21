@@ -1,0 +1,38 @@
+name: Build PDF
+
+on:
+  push:
+    paths:
+      - '**.md'
+      - '**.ttf'
+      - '.github/workflows/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install pandoc and texlive
+        run: |
+          sudo apt update
+          sudo apt install -y pandoc texlive-xetex fonts-freefont-ttf
+
+      - name: Register Bangla font
+        run: |
+          mkdir -p ~/.fonts
+          cp AponaLohit.ttf ~/.fonts/
+          fc-cache -fv
+
+      - name: Convert Markdown to PDF
+        run: |
+          pandoc "Mobile Servicing Training.md" -o training_output.pdf \
+            --pdf-engine=xelatex -V fontsize=14pt -V mainfont="AponaLohit"
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: bangla-pdf
+          path: training_output.pdf
