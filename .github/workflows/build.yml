@@ -1,65 +1,51 @@
 name: Build and Publish PDF
 
-on:
-  push:
-    paths:
-      - '**.md'
-      - '.github/workflows/**'
-      - 'template.tex'  # Optional: if you're using a custom LaTeX template
+on: push: paths: - '.md' - '.github/workflows/' - 'template.tex'
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
+permissions: contents: write pages: write id-token: write
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+jobs: build: runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-      - name: Set up GitHub Pages
-        uses: actions/configure-pages@v4
+  - name: Set up GitHub Pages
+    uses: actions/configure-pages@v4
 
-      - name: Install Pandoc, XeLaTeX, and Bengali fonts
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-lang-other fonts-noto
+  - name: Install Pandoc, XeLaTeX, and Bengali fonts
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-lang-other fonts-noto
 
-      - name: Sanitize Markdown input
-        run: |
-          iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
+  - name: Sanitize Markdown input
+    run: |
+      iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF with Noto fonts
-        run: |
-          pandoc clean.md -o training_output.pdf \
-            --pdf-engine=xelatex \
-            -V mainfont="Noto Sans" \
-            -V monofont="Noto Sans Mono" \
-            -V CJKmainfont="Noto Serif Bengali" \
-            -V fontsize=14pt \
-            --template=template.tex
+  - name: Convert Markdown to PDF with Noto fonts and custom template
+    run: |
+      pandoc clean.md -o training_output.pdf \
+        --pdf-engine=xelatex \
+        -V mainfont="Noto Sans" \
+        -V monofont="Noto Sans Mono" \
+        -V CJKmainfont="Noto Serif Bengali" \
+        -V fontsize=14pt \
+        --template=template.tex
 
-      - name: Copy PDF to public folder
-        run: |
-          mkdir -p public
-          mv training_output.pdf public/
+  - name: Copy PDF to public folder
+    run: |
+      mkdir -p public
+      mv training_output.pdf public/
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: public
+  - name: Upload artifact
+    uses: actions/upload-pages-artifact@v2
+    with:
+      path: public
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+deploy: needs: build runs-on: ubuntu-latest environment: name: github-pages url: ${{ steps.deployment.outputs.page_url }}
 
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+steps:
+  - name: Deploy to GitHub Pages
+    id: deployment
+    uses: actions/deploy-pages@v4
+
