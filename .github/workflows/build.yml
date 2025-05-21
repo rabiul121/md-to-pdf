@@ -25,19 +25,20 @@ jobs:
       - name: Install Pandoc, XeLaTeX, and fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-lang-bengali fonts-noto
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-lang-bengali fonts-noto-core fonts-noto-cjk
 
       - name: Sanitize Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF using correct fonts
+      - name: Convert Markdown to PDF
         run: |
           pandoc "clean.md" -o training_output.pdf \
             --pdf-engine=xelatex \
             -V mainfont="Noto Sans" \
-            -V otherlanguage="bengali" \
-            -V othermainfont="Noto Sans Bengali" \
+            -V sansfont="Noto Sans" \
+            -V monofont="Noto Sans Mono" \
+            -V CJKmainfont="Noto Sans Bengali" \
             -V fontsize=14pt
 
       - name: Copy PDF to output folder
@@ -45,7 +46,7 @@ jobs:
           mkdir -p public
           mv training_output.pdf public/
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: public
@@ -59,4 +60,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
