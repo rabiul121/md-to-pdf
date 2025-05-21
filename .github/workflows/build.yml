@@ -7,7 +7,7 @@ on:
       - '.github/workflows/**'
 
 permissions:
-  contents: write  # Needed to push to repo
+  contents: write
 
 jobs:
   build:
@@ -26,12 +26,12 @@ jobs:
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF with custom fonts
+      - name: Convert Markdown to PDF using Noto fonts
         run: |
           pandoc "clean.md" -o training_output.pdf \
             --pdf-engine=xelatex \
             -V mainfont="Noto Sans" \
-            -V CJKmainfont="Noto Serif Bengali" \
+            -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
       - name: Prepare docs folder
