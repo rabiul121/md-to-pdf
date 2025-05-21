@@ -1,62 +1,18 @@
-name: Build and Publish PDF
+\documentclass[12pt]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\setotherlanguage{bengali}
 
-on:
-  push:
-    paths:
-      - '**.md'
-      - '.github/workflows/**'
-      - 'template.tex'
+\newfontfamily\englishfont{Noto Sans}
+\newfontfamily\bengalifont[Script=Bengali]{Noto Serif Bengali}
+\newfontfamily\monofont{Noto Sans Mono}
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+\begin{document}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+$body$
 
-      - name: Set up GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Install Pandoc, XeLaTeX, and fonts
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex \
-            texlive-fonts-recommended texlive-lang-bengali fonts-noto
-
-      - name: Sanitize Markdown input
-        run: |
-          iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
-
-      - name: Convert Markdown to multilingual PDF
-        run: |
-          pandoc clean.md -o training_output.pdf \
-            --pdf-engine=xelatex \
-            --template=template.tex \
-            -V fontsize=14pt
-
-      - name: Copy PDF to output folder
-        run: |
-          mkdir -p public
-          mv training_output.pdf public/
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: public
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+\end{document}
