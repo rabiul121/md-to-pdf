@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -15,38 +17,47 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Pandoc, LuaLaTeX, and fonts (minimal)
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Install Pandoc, XeLaTeX, and Noto fonts
         run: |
           sudo apt update
-          sudo apt install -y pandoc lualatex \
-            texlive-luatex texlive-fonts-recommended \
-            texlive-latex-recommended texlive-latex-extra \
-            fonts-noto
+          sudo apt install -y pandoc texlive-xetex fonts-noto texlive-fonts-recommended texlive-latex-extra
 
       - name: Sanitize Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF with automatic font fallback
+      - name: Convert Markdown to PDF with multilingual font support
         run: |
           pandoc "clean.md" -o training_output.pdf \
-            --pdf-engine=lualatex \
+            --pdf-engine=xelatex \
             -V mainfont="Noto Sans" \
-            -V fallbackfont="Noto Serif Bengali" \
+            -V CJKmainfont="Noto Serif Bengali" \
             -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
-      - name: Prepare docs folder
+      - name: Prepare `docs` folder
         run: |
           mkdir -p docs
           mv training_output.pdf docs/
 
-      - name: Commit and push PDF to docs/
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add docs/training_output.pdf
-          git commit -m "Update PDF for GitHub Pages"
-          git push
+      - name: Upload `docs/` as GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
