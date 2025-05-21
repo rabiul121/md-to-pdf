@@ -40,12 +40,12 @@ jobs:
             -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
-      - name: Prepare `docs` folder
+      - name: Prepare docs folder
         run: |
           mkdir -p docs
           mv training_output.pdf docs/
 
-      - name: Upload `docs/` as GitHub Pages artifact
+      - name: Upload docs/ as GitHub Pages artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: docs
