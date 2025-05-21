@@ -23,30 +23,33 @@ jobs:
       - name: Set up GitHub Pages
         uses: actions/configure-pages@v4
 
-      - name: Install Pandoc, XeLaTeX, and fonts
+      - name: Install Pandoc, LaTeX, and Fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex \
-            texlive-fonts-recommended texlive-lang-bengali fonts-noto
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended \
+            texlive-lang-other fonts-noto
 
       - name: Sanitize Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to multilingual PDF
+      - name: Convert Markdown to PDF
         run: |
           pandoc clean.md -o training_output.pdf \
             --pdf-engine=xelatex \
             --template=template.tex \
+            -V mainfont="Noto Sans" \
+            -V sansfont="Noto Sans" \
+            -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
-      - name: Copy PDF to output folder
+      - name: Move PDF to public folder
         run: |
           mkdir -p public
           mv training_output.pdf public/
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v4
         with:
           path: public
 
@@ -56,6 +59,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
