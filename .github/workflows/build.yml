@@ -4,8 +4,8 @@ on:
   push:
     paths:
       - '**.md'
-      - 'template.tex'
       - '.github/workflows/**'
+      - 'template.tex'  # Optional: if you're using a custom LaTeX template
 
 permissions:
   contents: write
@@ -23,39 +23,32 @@ jobs:
       - name: Set up GitHub Pages
         uses: actions/configure-pages@v4
 
-      - name: Install Pandoc, XeLaTeX, and fonts
+      - name: Install Pandoc, XeLaTeX, and Bengali fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            pandoc \
-            texlive-xetex \
-            texlive-fonts-recommended \
-            texlive-lang-bengali \
-            fonts-noto-core \
-            fonts-noto-mono \
-            fonts-noto-unhinted
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-lang-other fonts-noto
 
       - name: Sanitize Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF using custom template
+      - name: Convert Markdown to PDF with Noto fonts
         run: |
           pandoc clean.md -o training_output.pdf \
             --pdf-engine=xelatex \
-            --template=template.tex \
             -V mainfont="Noto Sans" \
             -V monofont="Noto Sans Mono" \
             -V CJKmainfont="Noto Serif Bengali" \
-            -V fontsize=14pt
+            -V fontsize=14pt \
+            --template=template.tex
 
-      - name: Copy PDF to output folder
+      - name: Copy PDF to public folder
         run: |
           mkdir -p public
           mv training_output.pdf public/
 
-      - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
           path: public
 
