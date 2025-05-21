@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '**.md'
-      - '**.ttf'
       - '.github/workflows/**'
 
 jobs:
@@ -15,22 +14,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Pandoc and TeX
+      - name: Install Pandoc, XeLaTeX and Bangla fonts
         run: |
           sudo apt update
-          sudo apt install -y pandoc texlive-xetex fonts-freefont-ttf
+          sudo apt install -y pandoc texlive-xetex fonts-noto
 
-      - name: Register custom Bangla font
+      - name: Sanitize Markdown input (handle invalid Unicode)
         run: |
-          mkdir -p ~/.fonts
-          cp AponaLohit.ttf ~/.fonts/
-          fc-cache -fv
+          iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
       - name: Convert Markdown to PDF
         run: |
-          pandoc "Mobile Servicing Training.md" -o training_output.pdf \
+          pandoc "clean.md" -o training_output.pdf \
             --pdf-engine=xelatex \
-            -V mainfont="AponaLohit" \
+            -V mainfont="Noto Serif Bengali" \
             -V fontsize=14pt
 
       - name: Upload PDF artifact
