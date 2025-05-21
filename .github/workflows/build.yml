@@ -20,18 +20,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up GitHub Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
 
-      - name: Install Pandoc, XeLaTeX, and Noto fonts
+      - name: Install Pandoc, XeLaTeX, and Fonts
         run: |
           sudo apt update
           sudo apt install -y pandoc texlive-xetex fonts-noto texlive-fonts-recommended texlive-latex-extra
 
-      - name: Sanitize Markdown input
+      - name: Clean Markdown input
         run: |
           iconv -f utf-8 -t utf-8 -c "Mobile Servicing Training.md" > clean.md
 
-      - name: Convert Markdown to PDF with multilingual font support
+      - name: Convert Markdown to PDF with multilingual fonts
         run: |
           pandoc "clean.md" -o training_output.pdf \
             --pdf-engine=xelatex \
@@ -40,13 +40,13 @@ jobs:
             -V monofont="Noto Sans Mono" \
             -V fontsize=14pt
 
-      - name: Prepare docs folder
+      - name: Prepare docs directory
         run: |
           mkdir -p docs
           mv training_output.pdf docs/
 
-      - name: Upload docs/ as GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
@@ -60,4 +60,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
