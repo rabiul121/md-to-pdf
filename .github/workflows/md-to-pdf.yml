@@ -1,4 +1,4 @@
-name: Convert Markdown to PDF with Pandoc
+name: Convert Markdown to PDF with Pandoc (Simple)
 
 on:
   push:
@@ -12,27 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Pandoc
-        uses: r-lib/actions/setup-pandoc@v2
-        with:
-          pandoc-version: '3.1.1'
-
-      - name: Setup TeX Live
-        uses: xu-cheng/texlive-action/full@v1
-        with:
-          packages: >-
-            xetex
-            fontspec
-            polyglossia
-            unicode-math
-            hyperref
-
-      - name: Install fonts
+      - name: Install Pandoc and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji fonts-noto fonts-lohit-beng-bengali
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-fonts-extra fonts-noto-cjk fonts-noto-color-emoji fonts-noto fonts-lohit-beng-bengali
 
       - name: Convert with Pandoc
         run: |
@@ -47,12 +32,6 @@ jobs:
             -V papersize=a4 \
             -V geometry:margin=2.5cm \
             -o "Mobile Servicing Training.pdf"
-
-      - name: Upload PDF file
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-servicing-training-pdf
-          path: "Mobile Servicing Training.pdf"
 
       - name: Commit and push PDF
         run: |
