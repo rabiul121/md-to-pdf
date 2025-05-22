@@ -152,8 +152,9 @@ DC কারেন্ট একদিকে প্রবাহিত হয়, ত
 * **উদাহরণ:** মোবাইল ফোন বা কম্পিউটারের অভ্যন্তরীণ সার্কিট।
 
 
-**Class-02: Mobile Components Introduction**
-**Date: 21/05/2025**
+## Class-02: Mobile Components Introduction
+
+Date: 21/05/2025
 
 ## Mobile Motherboard-এর গুরুত্বপূর্ণ কম্পোনেন্টসমূহ ও সংক্ষিপ্ত ব্যাখা:
 
