@@ -1,15 +1,9 @@
--- Combined Lua filter: wrap Bengali + escape LaTeX + fix HorizontalRule + emoji font
+-- Combined Lua filter: wrap Bengali + escape LaTeX + fix HorizontalRule
 
 -- Utility: Identify Bengali characters (including danda U+0964, U+0965)
 local function is_bengali_char(char)
   local code = utf8.codepoint(char)
   return code == 0x0964 or code == 0x0965 or (code >= 0x0980 and code <= 0x09FF)
-end
-
--- Utility: Identify Emoji characters (range based, simplified)
-local function is_emoji_char(char)
-  local code = utf8.codepoint(char)
-  return (code >= 0x1F300 and code <= 0x1FAD6) or (code >= 0x1F600 and code <= 0x1F64F) -- emoji range
 end
 
 -- LaTeX special character replacements
@@ -33,31 +27,31 @@ local function escape_latex(str)
   end))
 end
 
--- Process text: wrap Bengali, emoji and escape all LaTeX specials
+-- Process text: wrap Bengali and escape all LaTeX specials
 local function process_text(text)
   local output = ""
   local in_bengali = false
-  local in_emoji = false
 
   for _, c in utf8.codes(text) do
     local char = utf8.char(c)
     if is_bengali_char(char) then
-      if in_emoji then output = output .. "}" in_emoji = false end
-      if not in_bengali then output = output .. "\\bn{" in_bengali = true end
-      output = output .. escape_latex(char)
-    elseif is_emoji_char(char) then
-      if in_bengali then output = output .. "}" in_bengali = false end
-      if not in_emoji then output = output .. "\\emoji{" in_emoji = true end
+      if not in_bengali then
+        output = output .. "\\bn{"
+        in_bengali = true
+      end
       output = output .. escape_latex(char)
     else
-      if in_bengali then output = output .. "}" in_bengali = false end
-      if in_emoji then output = output .. "}" in_emoji = false end
+      if in_bengali then
+        output = output .. "}"
+        in_bengali = false
+      end
       output = output .. escape_latex(char)
     end
   end
 
-  if in_bengali then output = output .. "}" end
-  if in_emoji then output = output .. "}" end
+  if in_bengali then
+    output = output .. "}"
+  end
 
   return output
 end
@@ -68,7 +62,7 @@ function Str(el)
   return pandoc.RawInline("latex", new_text)
 end
 
--- Escape + wrap Bengali and emoji text inside table cells
+-- Escape + wrap Bengali text inside table cells
 function Table(tbl)
   for _, row in ipairs(tbl.bodies[1].body) do
     for _, cell in ipairs(row.cells) do
