@@ -174,16 +174,6 @@ Microscope একটি অপটিক্যাল যন্ত্র যা �
 1. [Microscope 360° view](https://www.youtube.com/watch?v=DxtFnV2dDEE)
 2. [how to connect microscope to laptop Fully Setup ✅|| Mobile Repairing Setup || By Thanks Mobile](https://www.youtube.com/watch?v=cMUBBWzdkkE&pp=ygUibWljcm9zY29wZSBzZXR1cCBmb3IgbW9iaWxlIHJlcGFpcg%3D%3D)
 
-
-
-
-
-
-
-## 3. Microscope:
-
-খুব ছোট যন্ত্রাংশ যেমন IC, ক্যাপাসিটর, রেজিস্টার পর্যবেক্ষণের জন্য ব্যবহৃত হয়।
-
 ## 4. DC Power Supply:
 
 মোবাইলে কৃত্রিমভাবে পাওয়ার দেওয়ার জন্য ব্যবহৃত হয়।
