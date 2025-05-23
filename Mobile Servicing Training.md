@@ -553,7 +553,7 @@ DC Power Supply একটি ইলেকট্রনিক যন্ত্র �
 
 * [How to Use Oscilloscope for Mobile Repair - YouTube](https://www.youtube.com/watch?v=R1q3bqFMuXw)
 
-## মৌলিক ইলেকট্রনিক্স ধারণা (Basic Electronics Concepts)
+** মৌলিক ইলেকট্রনিক্স ধারণা (Basic Electronics Concepts)**
 
 ### ১৩. বিদ্যুৎ (Electricity)
 
