@@ -79,31 +79,31 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 
 **🔥 Hotgun:**
 
-1. **Temperature Control:** 100°C – 500°C পর্যন্ত কন্ট্রোল করা যায়।
-2. **Air Flow Control:** হাওয়ার গতি নিয়ন্ত্রণ করা যায়।
-3. **Nozzle Type:** বিভিন্ন মাপের নোজল দিয়ে হাওয়া ফোকাস করা যায়।
+1. Temperature Control: 100°C – 500°C পর্যন্ত কন্ট্রোল করা যায়।
+2. Air Flow Control: হাওয়ার গতি নিয়ন্ত্রণ করা যায়।
+3. Nozzle Type: বিভিন্ন মাপের নোজল দিয়ে হাওয়া ফোকাস করা যায়।
 
 **🔧 Soldering Iron:**
 
-1. **Temperature Adjustable:** কিছু মডেলে তাপমাত্রা সেট করা যায়।
-2. **Tip Variation:** বিভিন্ন আকারের Tip ব্যবহৃত হয় কাজ অনুযায়ী।
-3. **ON/OFF Switch:** কিছু মডেলে নিরাপত্তার জন্য সুইচ থাকে।
+1. Temperature Adjustable: কিছু মডেলে তাপমাত্রা সেট করা যায়।
+2. Tip Variation: বিভিন্ন আকারের Tip ব্যবহৃত হয় কাজ অনুযায়ী।
+3. ON/OFF Switch: কিছু মডেলে নিরাপত্তার জন্য সুইচ থাকে।
 
 
 **🧾 প্রকারভেদঃ**
 
 **Hotgun:**
 
-1. **Analog Hotgun**
-2. **Digital Temperature Controlled Hotgun**
-3. **Station Type Rework Station (Hotgun + Soldering Iron Combo)**
+1. Analog Hotgun
+2. Digital Temperature Controlled Hotgun
+3. Station Type Rework Station (Hotgun + Soldering Iron Combo)
 
 **Soldering Iron:**
 
-1. **Fixed Temperature Iron**
-2. **Adjustable Temperature Iron**
-3. **Soldering Station (Temperature Controller সহ)**
-4. **Cordless Soldering Iron (Battery-Operated)**
+1. Fixed Temperature Iron
+2. Adjustable Temperature Iron
+3. Soldering Station (Temperature Controller সহ)
+4. Cordless Soldering Iron (Battery-Operated)
 
 
 
