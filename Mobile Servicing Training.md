@@ -56,8 +56,6 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 1. [How to use DIGITAL MULTIMETER in Bangla - YouTube](https://www.youtube.com/watch?v=6mahtfOaXnQ)
 2. [Multimeter tutorial in bangla.Analog multimeter.Digital multimeter - Dailymotion](https://www.dailymotion.com/video/x7vul58)
 
-
-
 ## 2. Hotgun & Soldering Iron
 
 **সংজ্ঞা:**
@@ -117,10 +115,6 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 
 1. [How to use soldering Iron || সোল্ডারিং আয়রন ব্যবহারের সঠিক নিয়ম ](https://www.youtube.com/watch?v=A5_HRaEvoW0)
 2. [Hot Air Gun ব্যবহার নিয়ে যত ভুল,হট এয়ারগান ব্যবহার শিখুন](https://www.youtube.com/watch?v=4rNqDp0NGNc)
-
-ঠিক আছে! নিচে **Microscope (মোবাইল রিপেয়ারিং)** বিষয়টি আপনার দেওয়া ফরম্যাট অনুযায়ী সাজানো হলো, কোনো "---" লাইন নেই, এবং **ইমেজ ও ভিডিও লিংকগুলো চেক করে ১০০% কাজ করে এমন লিংকে পরিবর্তন করা হয়েছে**।
-
-------
 
 ## 3. Microscope (মোবাইল রিপেয়ারিং এ ব্যবহৃত)
 
@@ -324,7 +318,6 @@ DC কারেন্ট একদিকে প্রবাহিত হয়, ত
 
 * **সংজ্ঞা:** এই সার্কিটে সিরিজ এবং প্যারালাল দুই ধরনের সংযোগ একসাথে থাকে।
 * **প্রধান বৈশিষ্ট্য:**
-
   * সিরিজ এবং প্যারালালের বৈশিষ্ট্য একসাথে পাওয়া যায়।
   * জটিল সার্কিটের জন্য ব্যবহৃত হয়।
   * ভোল্টেজ ও কারেন্টের মান নির্ণয় করতে সিরিজ ও প্যারালাল নিয়ম দুটোই প্রয়োগ করতে হয়।
