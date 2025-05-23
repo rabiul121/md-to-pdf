@@ -68,7 +68,7 @@ Hotgun এবং Soldering Iron—দুইটি ভিন্ন ইলেক�
 - Air Flow Control: হাওয়ার গতি নিয়ন্ত্রণ করা যায়।
 - Nozzle Type: বিভিন্ন মাপের নোজল দিয়ে হাওয়া ফোকাস করা যায়।
 
-**Soldering Iron:**
+##### Soldering Iron
 
 - Temperature Adjustable: কিছু মডেলে তাপমাত্রা সেট করা যায়।
 - Tip Variation: বিভিন্ন আকারের Tip ব্যবহৃত হয় কাজ অনুযায়ী।
@@ -76,13 +76,13 @@ Hotgun এবং Soldering Iron—দুইটি ভিন্ন ইলেক�
 
 #### Hotgun & Soldering Iron: প্রকারভেদ
 
-**Hotgun:**
+##### Hotgun
 
 - Analog Hotgun
 - Digital Temperature Controlled Hotgun
 - Station Type Rework Station (Hotgun + Soldering Iron Combo)
 
-**Soldering Iron:**
+##### Soldering Iron
 
 - Fixed Temperature Iron
 - Adjustable Temperature Iron
