@@ -3,8 +3,10 @@
 \usepackage{fontspec}
 \setmainfont{Noto Sans}
 \newfontfamily\bengalifont[Script=Bengali]{Ekushey Lalsalu}
-\newfontfamily\emojifont{Noto Color Emoji} % 🔹 Added line
-\newcommand{\emoji}[1]{{\emojifont #1}}     % 🔹 Added line
+\newfontfamily\emojifont{Noto Emoji} % For emoji support
+\newfontfamily\symbolfont{Symbola}[Path=/home/robi/.fonts/]
+\newcommand{\emoji}[1]{{\emojifont #1}} % Wrapper command used by Lua filter
+\newcommand{\symb}[1]{{\symbolfont #1}}
 
 \usepackage{parskip}
 \usepackage{geometry}
@@ -55,6 +57,13 @@
 
 \pagenumbering{gobble}
 \setcounter{secnumdepth}{0}
+
+\usepackage{framed}
+\newenvironment{Shaded}{\begin{framed}}{\end{framed}}
+
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+\fvset{formatcom=\color{black}}
 
 \begin{document}
 

@@ -4,7 +4,7 @@
 REPO_DIR="/home/robi/Desktop/md-to-pdf/"
 INPUT_MD="Mobile Servicing Training.md"
 TEMPLATE="template.tex"
-LUA_FILTER="bengali-escape-hrule.lua"
+LUA_FILTER="bengali-escape-emoji-hrule.lua"
 
 cd "$REPO_DIR" || { echo "Repo dir not found"; exit 1; }
 

@@ -6,10 +6,42 @@ local function is_bengali_char(char)
   return code == 0x0964 or code == 0x0965 or (code >= 0x0980 and code <= 0x09FF)
 end
 
--- Utility: Identify Emoji characters (range based, simplified)
+-- Utility: Identify Emoji characters (range based, expanded for symbols)
 local function is_emoji_char(char)
   local code = utf8.codepoint(char)
-  return (code >= 0x1F300 and code <= 0x1FAD6) or (code >= 0x1F600 and code <= 0x1F64F) -- emoji range
+  -- Common emoji ranges
+  if (code >= 0x1F300 and code <= 0x1FAFF) or (code >= 0x1F600 and code <= 0x1F64F) then
+    return true
+  end
+  -- Dingbats, Misc Symbols, etc.
+  if (code >= 0x2600 and code <= 0x26FF) or (code >= 0x2700 and code <= 0x27BF) then
+    -- Exception: U+279C (➜) should be treated as a symbol, not emoji
+    if code == 0x279C then return false end
+    return true
+  end
+  -- Variation Selector-16 (U+FE0F) should be treated as part of emoji
+  if code == 0xFE0F then
+    return true
+  end
+  return false
+end
+
+-- Utility: Identify arrow and math symbol characters (for fallback font)
+local function is_symbol_char(char)
+  local code = utf8.codepoint(char)
+  -- Arrows and math symbols
+  if (code >= 0x2190 and code <= 0x21FF) then
+    return true
+  end
+  -- Miscellaneous Symbols and Arrows (for ⬅, ⬆, ⬇, ⬛, ⬜, etc.)
+  if (code >= 0x2B00 and code <= 0x2BFF) then
+    return true
+  end
+  -- Dingbats, Misc Symbols, etc. (for ➜ U+279C)
+  if code == 0x279C then
+    return true
+  end
+  return false
 end
 
 -- LaTeX special character replacements
@@ -38,26 +70,36 @@ local function process_text(text)
   local output = ""
   local in_bengali = false
   local in_emoji = false
+  local in_symbol = false
 
   for _, c in utf8.codes(text) do
     local char = utf8.char(c)
     if is_bengali_char(char) then
       if in_emoji then output = output .. "}" in_emoji = false end
+      if in_symbol then output = output .. "}" in_symbol = false end
       if not in_bengali then output = output .. "\\bn{" in_bengali = true end
       output = output .. escape_latex(char)
     elseif is_emoji_char(char) then
       if in_bengali then output = output .. "}" in_bengali = false end
+      if in_symbol then output = output .. "}" in_symbol = false end
       if not in_emoji then output = output .. "\\emoji{" in_emoji = true end
+      output = output .. escape_latex(char)
+    elseif is_symbol_char(char) then
+      if in_bengali then output = output .. "}" in_bengali = false end
+      if in_emoji then output = output .. "}" in_emoji = false end
+      if not in_symbol then output = output .. "\\symb{" in_symbol = true end
       output = output .. escape_latex(char)
     else
       if in_bengali then output = output .. "}" in_bengali = false end
       if in_emoji then output = output .. "}" in_emoji = false end
+      if in_symbol then output = output .. "}" in_symbol = false end
       output = output .. escape_latex(char)
     end
   end
 
   if in_bengali then output = output .. "}" end
   if in_emoji then output = output .. "}" end
+  if in_symbol then output = output .. "}" end
 
   return output
 end
