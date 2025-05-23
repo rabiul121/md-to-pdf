@@ -1,12 +1,9 @@
 # Mobile Servicing Training
 
-Class-01: Basic Tools & Basic Electronics Concepts
-
-Date: 20/05/2025
+    Class-01: Basic Tools & Basic Electronics Concepts
+    Date: 20/05/2025
 
 ---
-
-## পর্ব ১: মোবাইল সার্ভিসিং-এ ব্যবহৃত গুরুত্বপূর্ণ টুলস ও মৌলিক ধারণা
 
 ### 1. Digital Multimeter
 
