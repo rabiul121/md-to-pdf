@@ -99,7 +99,7 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 2. **Digital Temperature Controlled Hotgun**
 3. **Station Type Rework Station (Hotgun + Soldering Iron Combo)**
 
-Soldering Iron:
+**Soldering Iron:**
 
 1. **Fixed Temperature Iron**
 2. **Adjustable Temperature Iron**
