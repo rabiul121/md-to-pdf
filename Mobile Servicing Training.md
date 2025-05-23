@@ -1,6 +1,7 @@
 Here’s a complete Markdown test block with **all the emoji and symbol categories together**, ready for copy-pasting into your `.md` file:
 
 ---
+---
 
 ```markdown
 # ✅ Emoji & Symbol Compatibility Test
