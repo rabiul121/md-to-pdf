@@ -206,7 +206,7 @@ DC Power Supply একটি ইলেকট্রনিক যন্ত্র �
 
 #### DC Power Supply: ছবি/ডায়াগ্রাম এর লিংক
 
-- ![DC Power Supply Example](https://upload.wikimedia.org/wikipedia/commons/3/3e/DC_Power_Supply.jpg)
+- [What is a DC Power Supply? (All About Circuits)](https://www.allaboutcircuits.com/technical-articles/what-is-a-dc-power-supply/)
 - [DC Power Supply Connection Diagram (Electronics Hub)](https://www.electronicshub.org/dc-power-supply-circuit/)
 
 #### DC Power Supply: ভিডিও টিউটোরিয়াল এর লিংক (বাংলা)
