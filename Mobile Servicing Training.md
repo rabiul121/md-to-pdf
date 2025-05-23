@@ -96,12 +96,12 @@ Hotgun এবং Soldering Iron—দুইটি ভিন্ন ইলেক�
 - SMD Component রিমুভ/সোল্ডার করার জন্য Hotgun ও Soldering Iron Combo ব্যবহার
 - হিট শ্রিংক টিউব সঙ্কুচিত করতে Hotgun ব্যবহার
 
-#### Hotgun & Soldering Iron: ছবি/ডায়াগ্রাম এর লিংক
+#### ছবি/ডায়াগ্রাম
 
 - [Hot Gun](https://pin.it/f1a8yIGcf)
 - [Types of Soldering Iron Tips and How to Select the Right One?](https://components101.com/articles/commonly-available-types-soldering-iron-tips-and-which-one-should-you-choose)
 
-#### Hotgun & Soldering Iron: ভিডিও টিউটোরিয়াল এর লিংক (বাংলা)
+#### ভিডিও টিউটোরিয়াল
 
 1. [How to use soldering Iron || সোল্ডারিং আয়রন ব্যবহারের সঠিক নিয়ম](https://www.youtube.com/watch?v=A5_HRaEvoW0)
 2. [Hot Air Gun ব্যবহার নিয়ে যত ভুল,হট এয়ারগান ব্যবহার শিখুন](https://www.youtube.com/watch?v=4rNqDp0NGNc)
