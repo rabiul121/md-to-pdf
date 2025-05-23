@@ -99,14 +99,14 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 2. **Digital Temperature Controlled Hotgun**
 3. **Station Type Rework Station (Hotgun + Soldering Iron Combo)**
 
-### Soldering Iron:
+Soldering Iron:
 
 1. **Fixed Temperature Iron**
 2. **Adjustable Temperature Iron**
 3. **Soldering Station (Temperature Controller সহ)**
 4. **Cordless Soldering Iron (Battery-Operated)**
 
-------
+
 
 **✅ উদাহরণঃ**
 
@@ -115,23 +115,20 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 - SMD Component রিমুভ/সোল্ডার করার জন্য Hotgun ও Soldering Iron Combo ব্যবহার
 - হিট শ্রিংক টিউব সঙ্কুচিত করতে Hotgun ব্যবহার
 
-------
+
 
 **🖼️ ছবি/ডায়াগ্রাম এর লিংকঃ**
 
 - [Hotgun (Heat Gun) - Pinterest](https://www.pinterest.com/pin/heat-gun-electronics--692991250011132894/)
 - [Soldering Iron Tips Diagram - CircuitDigest](https://circuitdigest.com/article/types-of-soldering-iron-tips)
 
-------
+
 
 **🎥 ভিডিও টিউটোরিয়াল এর লিংক (বাংলা):**
 
 1. [Soldering Iron & Hotgun ব্যবহার শেখা | PCB Repair | Bangla Tutorial - YouTube](https://www.youtube.com/watch?v=yls8EVH4WZg)
 2. [How to Use Heat Gun and Soldering Iron in Bengali | Mobile Repair - YouTube](https://www.youtube.com/watch?v=F1JWyP8Og_g)
 
-------
-
-আরও টপিক দিলে, একই ফরম্যাটে তৈরি করে দিবো। ✍️
 
 ## 3. Microscope:
 
