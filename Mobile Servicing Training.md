@@ -62,6 +62,9 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 ## 2. Hotgun & Soldering Iron
 
 
+
+![Hotgun Example](123242de-d097-46c8-80c6-48ec69a75512.jpeg)
+
 **সংজ্ঞা:**
  Hotgun এবং Soldering Iron—দুইটি ভিন্ন ইলেকট্রনিক টুল যা মূলত সার্কিট মেরামতের কাজে ব্যবহৃত হয়।
 
@@ -131,8 +134,6 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 1. [Soldering Iron & Hotgun ব্যবহার শেখা | PCB Repair | Bangla Tutorial - YouTube](https://www.youtube.com/watch?v=yls8EVH4WZg)
 2. [How to Use Heat Gun and Soldering Iron in Bengali | Mobile Repair - YouTube](https://www.youtube.com/watch?v=F1JWyP8Og_g)
 
-
-![Hotgun Example](123242de-d097-46c8-80c6-48ec69a75512.jpeg)
 
 ## 3. Microscope:
 
