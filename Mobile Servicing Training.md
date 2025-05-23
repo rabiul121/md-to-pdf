@@ -52,34 +52,60 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 
 ### 2. Hotgun & Soldering Iron
 
+#### Hotgun & Soldering Iron: সংজ্ঞা
+
 Hotgun এবং Soldering Iron—দুইটি ভিন্ন ইলেকট্রনিক টুল যা মূলত সার্কিট মেরামতের কাজে ব্যবহৃত হয়।
 
 - Hotgun: একটি হিটিং ডিভাইস যা গরম বাতাস নির্গত করে প্লাস্টিক, হিট শ্রিংক টিউব, কিংবা কম্পোনেন্ট খুলে ফেলার কাজে ব্যবহৃত হয়।
 - Soldering Iron: ধাতব Solder গলিয়ে দুইটি কনডাক্টিভ সারফেস সংযোগ করার কাজে ব্যবহৃত হয়।
 
-Mode/Functions:
+#### Hotgun & Soldering Iron: সংক্ষিপ্ত ব্যাখ্যা
 
-- Hotgun: Temperature Control, Air Flow Control, Nozzle Type
-- Soldering Iron: Temperature Adjustable, Tip Variation, ON/OFF Switch
+- Hotgun: এটি গরম বাতাস ছাড়ে যার মাধ্যমে IC, Display, বা অন্য Sensitive কম্পোনেন্ট খুলে ফেলা বা লাগানো হয়।
+- Soldering Iron: এর মাথা গরম হয় এবং Solder Wire গলিয়ে দুইটি তার বা পিন সংযুক্ত করা হয়। এটি বিশেষ করে ছোট ইলেকট্রনিক মেরামতের জন্য ব্যবহৃত হয়।
 
-প্রকারভেদ:
+#### Hotgun & Soldering Iron: প্রধান Mode/Function গুলো
 
-- Hotgun: Analog, Digital Temperature Controlled, Station Type Rework Station
-- Soldering Iron: Fixed Temperature, Adjustable Temperature, Soldering Station, Cordless
+**Hotgun:**
 
-ব্যবহার:
+- Temperature Control: 100°C – 500°C পর্যন্ত কন্ট্রোল করা যায়।
+- Air Flow Control: হাওয়ার গতি নিয়ন্ত্রণ করা যায়।
+- Nozzle Type: বিভিন্ন মাপের নোজল দিয়ে হাওয়া ফোকাস করা যায়।
 
-- মাদারবোর্ডের IC খোলা বা লাগানো
-- মোবাইল চার্জিং পোর্ট পরিবর্তন
-- SMD Component রিমুভ/সোল্ডার
-- হিট শ্রিংক টিউব সঙ্কুচিত করা
+**Soldering Iron:**
 
-ছবি/ডায়াগ্রাম:
+- Temperature Adjustable: কিছু মডেলে তাপমাত্রা সেট করা যায়।
+- Tip Variation: বিভিন্ন আকারের Tip ব্যবহৃত হয় কাজ অনুযায়ী।
+- ON/OFF Switch: কিছু মডেলে নিরাপত্তার জন্য সুইচ থাকে।
+
+#### Hotgun & Soldering Iron: প্রকারভেদ
+
+**Hotgun:**
+
+- Analog Hotgun
+- Digital Temperature Controlled Hotgun
+- Station Type Rework Station (Hotgun + Soldering Iron Combo)
+
+**Soldering Iron:**
+
+- Fixed Temperature Iron
+- Adjustable Temperature Iron
+- Soldering Station (Temperature Controller সহ)
+- Cordless Soldering Iron (Battery-Operated)
+
+#### Hotgun & Soldering Iron: উদাহরণ
+
+- মাদারবোর্ডের IC খোলা বা লাগানোর জন্য Hotgun ব্যবহার
+- মোবাইল চার্জিং পোর্ট পরিবর্তনের জন্য Soldering Iron দিয়ে নতুন পোর্ট লাগানো
+- SMD Component রিমুভ/সোল্ডার করার জন্য Hotgun ও Soldering Iron Combo ব্যবহার
+- হিট শ্রিংক টিউব সঙ্কুচিত করতে Hotgun ব্যবহার
+
+#### Hotgun & Soldering Iron: ছবি/ডায়াগ্রাম এর লিংক
 
 - [Hot Gun](https://pin.it/f1a8yIGcf)
 - [Types of Soldering Iron Tips and How to Select the Right One?](https://components101.com/articles/commonly-available-types-soldering-iron-tips-and-which-one-should-you-choose)
 
-ভিডিও টিউটোরিয়াল:
+#### Hotgun & Soldering Iron: ভিডিও টিউটোরিয়াল এর লিংক (বাংলা)
 
 1. [How to use soldering Iron || সোল্ডারিং আয়রন ব্যবহারের সঠিক নিয়ম](https://www.youtube.com/watch?v=A5_HRaEvoW0)
 2. [Hot Air Gun ব্যবহার নিয়ে যত ভুল,হট এয়ারগান ব্যবহার শিখুন](https://www.youtube.com/watch?v=4rNqDp0NGNc)
@@ -88,30 +114,48 @@ Mode/Functions:
 
 ### 3. Microscope (মোবাইল রিপেয়ারিং এ ব্যবহৃত)
 
-Microscope একটি অপটিক্যাল যন্ত্র যা ছোট ও সূক্ষ্ম বস্তু, যেমন মোবাইলের সার্কিট বা SMD কম্পোনেন্টগুলো বড় করে দেখায়।
+#### Microscope: সংজ্ঞা
 
-Mode/Functions:
+Microscope একটি অপটিক্যাল যন্ত্র যা ছোট ও সূক্ষ্ম বস্তু, যেমন মোবাইলের সার্কিট বা SMD কম্পোনেন্টগুলো বড় করে দেখায়, যা খালি চোখে দেখা কঠিন।
 
-- Eyepiece (Ocular Lens), Objective Lens, LED Ring Light, Adjustable Arm & Stand, Zoom Dial, Camera Output
+- Repair Microscope বা PCB Microscope: বিশেষভাবে মোবাইল সার্কিট রিপেয়ার ও IC বসানো/খোলার কাজে ব্যবহৃত হয়।
 
-প্রকারভেদ:
+#### Microscope: সংক্ষিপ্ত ব্যাখ্যা
 
-- Stereo Microscope (Binocular), Digital USB Microscope, Trinocular Microscope, Portable Microscope
+- Microscope মোবাইলের ছোট ও জটিল সার্কিট বা SMD কম্পোনেন্ট পর্যবেক্ষণ করতে সাহায্য করে।
+- এটি ব্যবহারের মাধ্যমে Technician খুব সূক্ষ্মভাবে ভাঙা ট্রেস, সোল্ডার ব্রিজ বা ফাটা কম্পোনেন্ট খুঁজে বের করতে পারেন।
+- বিশেষ করে iPhone, Android motherboard রিপেয়ার, BGA IC রিমুভ/রিবল করার সময় এটি অত্যন্ত গুরুত্বপূর্ণ।
 
-ব্যবহার:
+#### Microscope: প্রধান অংশ ও Function গুলো
 
-- ক্ষতিগ্রস্ত ট্রেস নির্ধারণ
+- Eyepiece (Ocular Lens): চোখ দিয়ে পর্যবেক্ষণের জন্য 10x/20x ম্যাগনিফিকেশন থাকে।
+- Objective Lens: যেখান থেকে মূল ম্যাগনিফিকেশন হয় (2x–4x বা তার বেশি)
+- LED Ring Light: সার্কিটের উপর আলো ফেলার জন্য ব্যবহৃত হয়
+- Adjustable Arm & Stand: জুম ও ফোকাস সহজে কন্ট্রোল করার জন্য মুভেবল অংশ
+- Zoom Dial: ম্যাগনিফিকেশন বাড়ানো/কমানোর সুবিধা
+- Camera Output (Digital Microscope): সরাসরি মনিটরে ছবি দেখা যায়
+
+#### Microscope: প্রকারভেদ
+
+- Stereo Microscope (Binocular): Dual eyepiece সহ, 3D ভিউ দেয়
+- Digital USB Microscope: USB ক্যাবলের মাধ্যমে কম্পিউটার/মনিটরে লাইভ ভিউ
+- Trinocular Microscope: 2টি চোখে দেখার সুবিধা এবং 1টি ক্যামেরা পোর্ট থাকে
+- Portable Microscope: ব্যাটারি চালিত ছোট Microscope; সাধারণ পর্যবেক্ষণে কাজে আসে
+
+#### Microscope: উদাহরণ
+
+- iPhone 7 Audio IC রিপেয়ার করতে ক্ষতিগ্রস্ত ট্রেস নির্ধারণ করা
 - BGA IC রিবল করার আগে Ball গুলোর সারিবিন্যাস পরীক্ষা
-- USB Port বা Charging IC সোল্ডার জয়েন্ট দেখা
-- Display Connector-এর Pin পরীক্ষা
-- মাদারবোর্ডের রুক্ষ জায়গা চিহ্নিত করা
+- USB Port বা Charging IC সোল্ডার জয়েন্ট ক্লিয়ারলি দেখা
+- Display Connector-এর Pin ঠিক আছে কিনা পরীক্ষা করা
+- স্মার্টফোন মাদারবোর্ডের রুক্ষ জায়গা চিহ্নিত করে হিট দেওয়া
 
-ছবি/ডায়াগ্রাম:
+#### Microscope: ছবি/ডায়াগ্রাম এর লিংক
 
 - [Stereo Microscope for Mobile Repair - Amazon](https://www.amazon.com/dp/B00BQWQ6F6)
 - [Trinocular Microscope Setup - YouTube Screenshot](https://i.ytimg.com/vi/ojX6u1z3DOk/maxresdefault.jpg)
 
-ভিডিও টিউটোরিয়াল:
+#### Microscope: ভিডিও টিউটোরিয়াল এর লিংক (বাংলা)
 
 1. [Microscope 360° view](https://www.youtube.com/watch?v=DxtFnV2dDEE)
 2. [how to connect microscope to laptop Fully Setup ✅|| Mobile Repairing Setup || By Thanks Mobile](https://www.youtube.com/watch?v=cMUBBWzdkkE&pp=ygUibWljcm9zY29wZSBzZXR1cCBmb3IgbW9iaWxlIHJlcGFpcg%3D%3D)
@@ -120,28 +164,48 @@ Mode/Functions:
 
 ### 4. DC Power Supply (মোবাইল রিফেয়ারিং-এ ব্যবহৃত)
 
+#### DC Power Supply: সংজ্ঞা
+
 DC Power Supply একটি ইলেকট্রনিক যন্ত্র যা নির্দিষ্ট ভোল্টেজ ও অ্যাম্পিয়ারে DC (Direct Current) বিদ্যুৎ সরবরাহ করে।
 
-Mode/Functions:
+- DC Power Supply: মোবাইল ফোনের পাওয়ার অন সমস্যা, শর্ট সার্কিট ট্রেসিং, কারেন্ট ড্র চেকিং ইত্যাদি কাজের জন্য অপরিহার্য টুল।
+- ভোল্টেজ রেঞ্জ: 1.5V – 15V
+- কারেন্ট রেঞ্জ: 0.6A – 2A
+- মোবাইল মাদারবোর্ডে সাধারণত 3.7V – 4.2V প্রয়োজন হয়।
 
-- Voltage Adjustable, Current Adjustable, Current Draw Monitoring, Short Circuit Detection, Output ON/OFF Switch
+#### DC Power Supply: সংক্ষিপ্ত ব্যাখ্যা
 
-প্রকারভেদ:
+- এটি সরাসরি ব্যাটারির বদলে ফোনের সার্কিটে পাওয়ার সরবরাহ করতে পারে।
+- এর মাধ্যমে ফোন চালু হচ্ছে কিনা, শর্ট সার্কিট আছে কিনা বা কত অ্যাম্পিয়ার কারেন্ট নিচ্ছে তা জানা যায়।
 
-- Analog, Digital, Multi-Channel, Battery Eliminator, Mini Portable
+#### DC Power Supply: প্রধান Mode/Function গুলো
 
-ব্যবহার:
+- Voltage Adjustable: সাধারণত 0-30V পর্যন্ত নিয়ন্ত্রণযোগ্য।
+- Current Adjustable: কারেন্ট লিমিট সেট করা যায় শর্ট সার্কিট প্রতিরোধে।
+- Current Draw Monitoring: ফোন চালু হলে কত অ্যাম্পিয়ার নিচ্ছে তা মনিটর করা যায়।
+- Short Circuit Detection: শর্ট থাকলে কারেন্ট হঠাৎ বেড়ে যাওয়ার মাধ্যমে শনাক্ত করা যায়।
+- Output ON/OFF Switch: নিরাপত্তার জন্য আলাদা সুইচ থাকে।
 
-- ফোনের পাওয়ার অন না হলে DC Power Supply দিয়ে কারেন্ট ড্র দেখে সমস্যা বোঝা
-- শর্ট সার্কিট চেক করা
-- ব্যাটারি বাদ দিয়ে সরাসরি পাওয়ার দিয়ে মোবাইল টেস্ট
+#### DC Power Supply: প্রকারভেদ
 
-ছবি/ডায়াগ্রাম:
+- Analog DC Power Supply
+- Digital DC Power Supply
+- Multi-Channel Power Supply
+- Battery Eliminator (Fixed Voltage Output)
+- Mini Portable DC Power Supply
+
+#### DC Power Supply: উদাহরণ
+
+- ফোনের পাওয়ার অন না হলে DC Power Supply দিয়ে পাওয়ার দিলে কারেন্ট ড্র দেখে সমস্যা বোঝা যায়।
+- শর্ট সার্কিট চেক করার জন্য ভোল্টেজ সেট করে বোর্ডে দেওয়ার সাথে সাথে কোন পার্টে গরম হচ্ছে তা দেখে শনাক্ত করা যায়।
+- ব্যাটারি বাদ দিয়ে সরাসরি পাওয়ার দিয়ে মোবাইল টেস্ট করা হয়।
+
+#### DC Power Supply: ছবি/ডায়াগ্রাম এর লিংক
 
 - [What is a DC Power Supply? (All About Circuits)](https://www.allaboutcircuits.com/technical-articles/what-is-a-dc-power-supply/)
 - [DC Power Supply Connection Diagram (Electronics Hub)](https://www.electronicshub.org/dc-power-supply-circuit/)
 
-ভিডিও টিউটোরিয়াল:
+#### DC Power Supply: ভিডিও টিউটোরিয়াল এর লিংক (বাংলা)
 
 1. [DC Power Supply ব্যাবহার | মোবাইল শর্ট চেক | Phone Not Power On Solution – YouTube](https://www.youtube.com/watch?v=btUAM2pjknI)
 2. [How to Use DC Power Supply in Mobile Repair | Bangla Tutorial – YouTube](https://www.youtube.com/watch?v=SwkYyHgD7yA)
