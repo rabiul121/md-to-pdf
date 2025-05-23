@@ -175,7 +175,6 @@ Microscope একটি অপটিক্যাল যন্ত্র যা �
 2. [how to connect microscope to laptop Fully Setup ✅|| Mobile Repairing Setup || By Thanks Mobile](https://www.youtube.com/watch?v=cMUBBWzdkkE&pp=ygUibWljcm9zY29wZSBzZXR1cCBmb3IgbW9iaWxlIHJlcGFpcg%3D%3D)
 
 
-
 ## 4. DC Power Supply (মোবাইল রিফেয়ারিং-এ ব্যবহৃত)
 
 **সংজ্ঞা:**
