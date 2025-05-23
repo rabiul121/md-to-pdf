@@ -205,8 +205,8 @@ Microscope একটি অপটিক্যাল যন্ত্র যা �
 
 **🖼️ ছবি/ডায়াগ্রাম এর লিংকঃ**
 
-- [DC Power Supply for Mobile Repair – Pinterest](https://www.pinterest.com/pin/dc-power-supply-used-in-mobile-repair--1168128027713650988/)
-- [DC Power Supply Connection Diagram – Pinterest](https://www.pinterest.com/pin/dc-power-supply-connection--861946160897832816/)
+- ![DC Power Supply Example](https://upload.wikimedia.org/wikipedia/commons/3/3e/DC_Power_Supply.jpg)
+- [DC Power Supply Connection Diagram (Electronics Hub)](https://www.electronicshub.org/dc-power-supply-circuit/)
 
 **🎥 ভিডিও টিউটোরিয়াল এর লিংক (বাংলা):**
 
