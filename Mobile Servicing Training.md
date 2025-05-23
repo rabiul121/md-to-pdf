@@ -74,9 +74,7 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 - Hotgun: এটি গরম বাতাস ছাড়ে যার মাধ্যমে IC, Display, বা অন্য Sensitive কম্পোনেন্ট খুলে ফেলা বা লাগানো হয়।
 - Soldering Iron: এর মাথা গরম হয় এবং Solder Wire গলিয়ে দুইটি তার বা পিন সংযুক্ত করা হয়। এটি বিশেষ করে ছোট ইলেকট্রনিক মেরামতের জন্য ব্যবহৃত হয়।
 
-![alt text](123242de-d097-46c8-80c6-48ec69a75512.jpeg)
 
-**![123242de-d097-46c8-80c6-48ec69a75512](/home/robi/Downloads/123242de-d097-46c8-80c6-48ec69a75512.jpeg)**
 
 
 
@@ -133,6 +131,8 @@ DMM-এ সাধারণত দুটি প্রোব (Probe) থাকে 
 1. [Soldering Iron & Hotgun ব্যবহার শেখা | PCB Repair | Bangla Tutorial - YouTube](https://www.youtube.com/watch?v=yls8EVH4WZg)
 2. [How to Use Heat Gun and Soldering Iron in Bengali | Mobile Repair - YouTube](https://www.youtube.com/watch?v=F1JWyP8Og_g)
 
+
+![Hotgun Example](123242de-d097-46c8-80c6-48ec69a75512.jpeg)
 
 ## 3. Microscope:
 
