@@ -8,7 +8,7 @@ Here’s a complete Markdown test block with **all the emoji and symbol categori
 
 ## ✅ Basic Status Indicators
 
-- ✅ Completed
+- ✅ Complete
 - ❌ Error
 - ✔️ Done
 - ✖️ Failed
