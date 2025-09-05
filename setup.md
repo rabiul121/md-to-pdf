@@ -82,13 +82,17 @@ Both scripts will use the template and Lua filter, producing `output/output.pdf`
 - **Manual Conversion:**
   Run Pandoc directly for custom options:
   ```fish
+  ./convert_to_pdf.sh
+  ```
+  OR
+  ```fish
   pandoc input.md --template=template.tex --lua-filter=multi-lang-font-filter.lua -o output/output.pdf
   ```
 
 - **Automatic Conversion and Push:**
   Use the automation script for continuous conversion and GitHub push:
   ```fish
-  ./auto_convert.sh
+  ../auto_convert_and_push.sh
   ```
 
 - **Add new language support:**
