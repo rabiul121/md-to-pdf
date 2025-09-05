@@ -71,12 +71,19 @@ Example: `output/output.pdf`
 ## File Overview
 
 `input.md` – Your Markdown source file
+
 `template.tex` – Custom LaTeX template for multilingual PDF
+
 `multi-lang-font-filter.lua` – Pandoc Lua filter for Bengali, Arabic, emoji, and symbol handling
+
 `convert_to_pdf.sh` – Manual conversion script
+
 `auto_convert.sh` – Automation script (watches for changes in file, converts into PDF, and pushes to GitHub)
+
 `output/` – Output directory for generated PDFs
+
 `output/output.pdf` – Main generated PDF
+
 `setup.md` – Detailed setup and customization guide
 
 ---
