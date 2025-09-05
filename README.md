@@ -56,7 +56,7 @@ You have two options:
 
 - **Automatic conversion and push:**
 	```sh
-	./auto_convert.sh
+	./auto_convert_and_push.sh
 	```
 	This script watches for changes in `input.md`, automatically converts to PDF, and pushes updates to GitHub.
 
