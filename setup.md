@@ -92,7 +92,7 @@ Both scripts will use the template and Lua filter, producing `output/output.pdf`
 - **Automatic Conversion and Push:**
   Use the automation script for continuous conversion and GitHub push:
   ```fish
-  ../auto_convert_and_push.sh
+  ./auto_convert_and_push.sh
   ```
 
 - **Add new language support:**
