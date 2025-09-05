@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Change these variables to your actual repo path and filenames
-REPO_DIR="/home/robi/Desktop/md-to-pdf/"
-INPUT_MD="Mobile Servicing Training.md"
-TEMPLATE="template.tex"
-LUA_FILTER="bengali-escape-emoji-hrule.lua"
 
-cd "$REPO_DIR" || { echo "Repo dir not found"; exit 1; }
+# Variables (match convert_to_pdf.sh)
+INPUT_MD="input.md"
+TEMPLATE="/media/robi/Robi/Linux/md-to-pdf/template.tex"
+LUA_FILTER="multi-lang-font-filter.lua"
+OUTPUT_DIR="./output"
+OUTPUT_PDF="$OUTPUT_DIR/output.pdf"
 
-OUTPUT_PDF="${INPUT_MD// /_}"
-OUTPUT_PDF="${OUTPUT_PDF%.md}.pdf"
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
 
-echo "Watching $INPUT_MD for changes in $REPO_DIR..."
+echo "Watching $INPUT_MD for changes..."
 
 while inotifywait -e close_write "$INPUT_MD"; do
     echo "Change detected. Converting $INPUT_MD to PDF..."
