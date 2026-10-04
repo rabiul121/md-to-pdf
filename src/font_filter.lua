@@ -207,7 +207,9 @@ end
 local function set_arabic_paragraph_direction(block)
   if contains_arabic(pandoc.utils.stringify(block)) then
     local content = block.content or block.c
-    table.insert(content, 1, pandoc.RawInline("latex", "\\noindent"))
+    local NO_INDENT = pandoc.RawInline("latex", "\\noindent")
+    table.insert(content, 1, NO_INDENT)
+    table.insert(content, 2, pandoc.RawInline("latex", "{} "))
     if block.content then
       block.content = content
     else
