@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated PDFs in output folder
+output/*.pdf
+output/**/*.pdf
+
+# User-specific settings and locally supplied Windows system fonts
+/profiles.json
+/assets/fonts/symbol/seguiemj.ttf
+/assets/fonts/symbol/seguisym.ttf
+/input/The Chestnut Man Bengali.docx
+/input/The Chestnut Man Bengali.md
+
+# LaTeX build artifacts
+*.log
+*.aux
+*.out
+*.toc
+
+# OS / IDE noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Stray accidental output paths (e.g. from absolute-path bugs)
+CUsers*/
+Users/robi/

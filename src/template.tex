@@ -1,0 +1,337 @@
+% =============================================================
+% Pandoc XeLaTeX Template for Multilingual PDF Generation
+% -------------------------------------------------------------
+% Purpose:
+%   - Used with Pandoc and XeLaTeX to convert Markdown to PDF.
+%   - Supports Bengali, Arabic, Emoji, Symbols, and English text.
+% Font Setup:
+%   - DejaVu Sans: Stable default font for English and general text.
+%   - Ekushey Lalsalu: Bengali script (\bn{...}).
+%   - Amiri: Arabic script (\ar{...}).
+%   - Noto Emoji: Emoji support (\emoji{...}).
+%   - Symbola: Symbol support (\symb{...}).
+%   - Font paths may need adjustment for your system.
+% Usage Notes:
+%   - Lua filter should wrap Bengali, Arabic, Emoji, and Symbol text with the above commands for correct rendering.
+%   - Place custom fonts in ~/.fonts or update Path in fontspec commands.
+%   - Section formatting, TOC, tables, images, and page geometry are customized for clarity and readability.
+%   - Do not modify code below unless you understand LaTeX and Pandoc templates.
+%   - For troubleshooting font issues, check font installation and Lua filter output.
+% =============================================================
+
+
+\documentclass[$if(fontsize)$$fontsize$$else$12pt$endif$]{extarticle}
+
+\usepackage{fontspec}
+$if(fontenglishfile)$
+\setmainfont[Path=$fontenglishpath$]{$fontenglishfile$}
+$else$
+\setmainfont{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+$endif$
+$if(fontheadinglatinfile)$
+  $if(boldheadings)$
+\newfontfamily\headinglatinfont[Path=$fontheadinglatinpath$,FakeBold=2]{$fontheadinglatinfile$}
+  $else$
+\newfontfamily\headinglatinfont[Path=$fontheadinglatinpath$]{$fontheadinglatinfile$}
+  $endif$
+$else$
+  $if(boldheadings)$
+\newfontfamily\headinglatinfont[FakeBold=2]{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+  $else$
+\newfontfamily\headinglatinfont{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+  $endif$
+$endif$
+$if(fontheadingbengalifile)$
+  $if(boldheadings)$
+\newfontfamily\headingbengalifont[Script=Bengali,Path=$fontheadingbengalipath$,FakeBold=2]{$fontheadingbengalifile$}
+  $else$
+\newfontfamily\headingbengalifont[Script=Bengali,Path=$fontheadingbengalipath$]{$fontheadingbengalifile$}
+  $endif$
+$else$
+\newfontfamily\headingbengalifont[Script=Bengali]{$if(fontbengali)$$fontbengali$$else$SolaimanLipi$endif$}
+$endif$
+% Bengali font: SolaimanLipi
+$if(fontbengalifile)$
+\newfontfamily\bengalifont[Script=Bengali,Path=$fontbengalipath$]{$fontbengalifile$}
+$else$
+\newfontfamily\bengalifont[Script=Bengali]{$if(fontbengali)$$fontbengali$$else$SolaimanLipi$endif$}
+$endif$
+% Emoji and symbol fonts are installed from the bundled assets.
+$if(fontemojifile)$
+\newfontfamily\emojifont[Path=$fontemojipath$]{$fontemojifile$}
+$else$
+\newfontfamily\emojifont{$if(fontemoji)$$fontemoji$$else$Noto Emoji$endif$}
+$endif$
+$if(fontemojiSupplementfile)$
+\newfontfamily\emojisupplementfont[Path=$fontemojiSupplementpath$]{$fontemojiSupplementfile$}
+$else$
+\newfontfamily\emojisupplementfont{$if(fontemoji)$$fontemoji$$else$Noto Emoji$endif$}
+$endif$
+$if(fontsymbolfile)$
+\newfontfamily\symbolfont[Path=$fontsymbolpath$]{$fontsymbolfile$}
+$else$
+\newfontfamily\symbolfont{$if(fontsymbol)$$fontsymbol$$else$Noto Sans Symbols 2$endif$}
+$endif$
+$if(fontcurrency)$
+\newfontfamily\currencyfont{$fontcurrency$}
+$else$
+\newfontfamily\currencyfont{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+$endif$
+% Arabic font: Amiri (or Segoe UI / Arial)
+$if(fontarabicfile)$
+\newfontfamily\arabicfont[Script=Arabic,Path=$fontarabicpath$]{$fontarabicfile$}
+$else$
+\newfontfamily\arabicfont[Script=Arabic]{$if(fontarabic)$$fontarabic$$else$Amiri$endif$}
+$endif$
+\newcommand{\emoji}[1]{{\emojifont #1}} % Wrapper command used by Lua filter
+\newcommand{\emojisupplement}[1]{{\emojisupplementfont #1}}
+\newcommand{\symb}[1]{{\symbolfont #1}}
+\newcommand{\currency}[1]{{\currencyfont #1}}
+
+\usepackage{graphicx} % For image inclusion
+\setkeys{Gin}{width=\linewidth,keepaspectratio} % Scale images to fit text width
+
+\usepackage{parskip}
+$if(firstlineindent)$
+\setlength{\parindent}{$indentamount$}
+\setlength{\parskip}{0.5em}
+\usepackage{indentfirst}
+$else$
+\setlength{\parindent}{0pt}
+$endif$
+\setlength{\parskip}{$paragraphspacing$}
+\usepackage{geometry}
+$if(geometry)$
+\geometry{$for(geometry)$$geometry$$sep$,$endfor$}
+$else$
+\geometry{a4paper, margin=1in}
+$endif$
+
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\headinglatinfont\headingtexttrue\Large$if(centerheadings)$\centering$endif$}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\headinglatinfont\headingtexttrue\large$if(centerheadings)$\centering$endif$}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\headinglatinfont\headingtexttrue\normalsize$if(centerheadings)$\centering$endif$}
+  {\thesubsubsection}{1em}{}
+
+\usepackage{xcolor}
+\usepackage{tocloft}
+$if(pageborder)$
+\usepackage{tikz}
+\usepackage{eso-pic}
+\AddToShipoutPictureBG{\begin{tikzpicture}[remember picture,overlay]\draw[black!55,line width=0.6pt] ([xshift=8mm,yshift=-8mm]current page.north west) rectangle ([xshift=-8mm,yshift=8mm]current page.south east);\end{tikzpicture}}
+$endif$
+$if(beautifytoc)$
+\renewcommand{\cftdotsep}{2}
+\setlength{\cftbeforesecskip}{5pt}
+$else$
+\renewcommand{\cftdotsep}{10000}
+$endif$
+\renewcommand{\cftsecdotsep}{\cftdotsep}
+\renewcommand{\cfttoctitlefont}{$toctitlealignment$\headinglatinfont\fontsize{$toctitlesize$}{\dimexpr $toctitlesize$ + 4pt\relax}\selectfont\color{$toctitlecolor$}}
+\renewcommand{\cftaftertoctitle}{$toctitleendfill$$tocaftertitle$}
+\renewcommand{\cftsecfont}{\bfseries\color{$tocentrycolor$}}
+$if(tocpagebangla)$
+\renewcommand{\cftsecpagefont}{\bengalifont}
+\renewcommand{\cftsubsecpagefont}{\bengalifont}
+\renewcommand{\cftsubsubsecpagefont}{\bengalifont}
+$endif$
+$if(toclanguagebangla)$
+\renewcommand{\contentsname}{{\headingbengalifont সূচিপত্র}}
+$else$
+\renewcommand{\contentsname}{Table of Contents}
+$endif$
+% Redefine horizontal rule
+\makeatletter
+\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+\renewcommand{\rule}[2]{\hrule height #2 width \linewidth}
+\makeatother
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Added for Pandoc table support
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\newcounter{none} % Fix for Pandoc 3.x \def\LTcaptype{none}
+
+\usepackage{hyperref}
+\usepackage{accsupp}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=$tocentrycolor$,
+  urlcolor=blue,
+  pdftitle={Training Document},
+  pdfauthor={Your Name},
+  pdfsubject={Mobile Servicing Training},
+  pdfkeywords={Mobile, Training, Bengali},
+}
+
+\newif\ifheadingtext
+\headingtextfalse
+\newcommand{\bn}[1]{\ifheadingtext{\headingbengalifont #1}\else{\bengalifont #1}\fi}
+
+\newcommand{\ar}[1]{{\arabicfont\RL{#1}}}
+\newenvironment{ArabicParagraph}{\begin{RTL}\raggedleft\setlength{\parindent}{0pt}}{\end{RTL}}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\bangladigits}{m}
+  {
+    \tl_if_blank:nF {#1}
+      {
+        \group_begin:
+        \bengalifont
+        \tl_set:Nx \l_tmpa_tl {#1}
+        \tl_replace_all:Nnn \l_tmpa_tl {0}{০}
+        \tl_replace_all:Nnn \l_tmpa_tl {1}{১}
+        \tl_replace_all:Nnn \l_tmpa_tl {2}{২}
+        \tl_replace_all:Nnn \l_tmpa_tl {3}{৩}
+        \tl_replace_all:Nnn \l_tmpa_tl {4}{৪}
+        \tl_replace_all:Nnn \l_tmpa_tl {5}{৫}
+        \tl_replace_all:Nnn \l_tmpa_tl {6}{৬}
+        \tl_replace_all:Nnn \l_tmpa_tl {7}{৭}
+        \tl_replace_all:Nnn \l_tmpa_tl {8}{৮}
+        \tl_replace_all:Nnn \l_tmpa_tl {9}{৯}
+        \tl_use:N \l_tmpa_tl
+        \group_end:
+      }
+  }
+\ExplSyntaxOff
+
+\makeatletter
+\newcommand{\tocpagevalue}[1]{$if(tocpagebangla)$\bangladigits{#1}$else$#1$endif$}
+\renewcommand{\cftsecfillnum}[1]{%
+  {\cftsecleader}\nobreak
+  \UseHookWithArguments{contentsline/page/before}{4}{1}{}{#1}{\@contentsline@destination}%
+  \makebox[\@pnumwidth][\cftpnumalign]{\cftsecpagefont\tocpagevalue{#1}}%
+  \UseHookWithArguments{contentsline/page/after}{4}{1}{}{#1}{\@contentsline@destination}%
+  \cftsecafterpnum\par}
+\renewcommand{\cftsubsecfillnum}[1]{%
+  {\cftsubsecleader}\nobreak
+  \UseHookWithArguments{contentsline/page/before}{4}{2}{}{#1}{\@contentsline@destination}%
+  \makebox[\@pnumwidth][\cftpnumalign]{\cftsubsecpagefont\tocpagevalue{#1}}%
+  \UseHookWithArguments{contentsline/page/after}{4}{2}{}{#1}{\@contentsline@destination}%
+  \cftsubsecafterpnum\par}
+\renewcommand{\cftsubsubsecfillnum}[1]{%
+  {\cftsubsubsecleader}\nobreak
+  \UseHookWithArguments{contentsline/page/before}{4}{3}{}{#1}{\@contentsline@destination}%
+  \makebox[\@pnumwidth][\cftpnumalign]{\cftsubsubsecpagefont\tocpagevalue{#1}}%
+  \UseHookWithArguments{contentsline/page/after}{4}{3}{}{#1}{\@contentsline@destination}%
+  \cftsubsubsecafterpnum\par}
+\makeatother
+  $if(tocpagebangla)$
+  \renewcommand{\cftsecpagefont}{\bengalifont}
+  \renewcommand{\cftsubsecpagefont}{\bengalifont}
+  \renewcommand{\cftsubsubsecpagefont}{\bengalifont}
+$endif$
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{setspace}
+\linespread{$lineheight$}
+$if(hyphenation)$
+$else$
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+$endif$
+
+\newcommand{\setmainpagenumbers}{%
+  \pagenumbering{$if(pagenumberstyle)$$pagenumberstyle$$else$arabic$endif$}%
+$if(pagenumbers)$
+$if(pagenumberlanguagebangla)$
+  \fancyfoot[$pagenumberposition$]{{\fontsize{$pagenumbersize$}{\dimexpr $pagenumbersize$ + 2pt\relax}\selectfont $pagenumbertextbangla$}}%
+  \fancypagestyle{plain}{\fancyhf{}\fancyfoot[$pagenumberposition$]{{\fontsize{$pagenumbersize$}{\dimexpr $pagenumbersize$ + 2pt\relax}\selectfont $pagenumbertextbangla$}}}%
+$else$
+  \fancyfoot[$pagenumberposition$]{{\fontsize{$pagenumbersize$}{\dimexpr $pagenumbersize$ + 2pt\relax}\selectfont $pagenumbertext$}}%
+  \fancypagestyle{plain}{\fancyhf{}\fancyfoot[$pagenumberposition$]{{\fontsize{$pagenumbersize$}{\dimexpr $pagenumbersize$ + 2pt\relax}\selectfont $pagenumbertext$}}}%
+$endif$
+$else$
+  \fancyfoot{}%
+  \fancypagestyle{plain}{\fancyhf{}}%
+$endif$
+}
+\newcommand{\setfrontpagenumbers}{%
+$if(frontpagenumbers)$
+  \pagenumbering{$if(frontpagenumberstyle)$$frontpagenumberstyle$$else$roman$endif$}%
+$if(frontpagenumberlanguagebangla)$
+  \fancyfoot[$frontpagenumberposition$]{{\fontsize{$frontpagenumbersize$}{\dimexpr $frontpagenumbersize$ + 2pt\relax}\selectfont $frontpagenumbertextbangla$}}%
+  \fancypagestyle{plain}{\fancyhf{}\fancyfoot[$frontpagenumberposition$]{{\fontsize{$frontpagenumbersize$}{\dimexpr $frontpagenumbersize$ + 2pt\relax}\selectfont $frontpagenumbertextbangla$}}}%
+$else$
+  \fancyfoot[$frontpagenumberposition$]{{\fontsize{$frontpagenumbersize$}{\dimexpr $frontpagenumbersize$ + 2pt\relax}\selectfont $frontpagenumbertext$}}%
+  \fancypagestyle{plain}{\fancyhf{}\fancyfoot[$frontpagenumberposition$]{{\fontsize{$frontpagenumbersize$}{\dimexpr $frontpagenumbersize$ + 2pt\relax}\selectfont $frontpagenumbertext$}}}%
+$endif$
+$else$
+  \fancyfoot{}%
+  \fancypagestyle{plain}{\fancyhf{}}%
+$endif$
+}
+\setcounter{secnumdepth}{0}
+
+% Prevent text and URLs from overflowing margins (especially on narrow mobile sizes)
+\usepackage{xurl}
+\sloppy
+\setlength{\emergencystretch}{3em}
+\hfuzz=1pt
+\vfuzz=1pt
+
+\usepackage{framed}
+\newenvironment{Shaded}{\begin{framed}}{\end{framed}}
+
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+\fvset{formatcom=\color{black}}
+
+\usepackage{bidi}
+$if(copyfriendlytext)$
+\XeTeXgenerateactualtext=1
+$endif$
+
+\begin{document}
+
+$if(title)$
+\title{$title$}
+$endif$
+$if(author)$
+\author{$for(author)$$author$$sep$\and $endfor$}
+$endif$
+$if(date)$
+\date{$date$}
+$endif$
+
+$if(toc)$
+\clearpage
+\setfrontpagenumbers
+\begingroup
+\setlength{\parindent}{0pt}
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsecnumwidth}{0pt}
+\setlength{\cftsubsecindent}{0pt}
+\setlength{\cftsubsecnumwidth}{0pt}
+\cftsetpnumwidth{2.2em}
+\cftsetrmarg{3.2em}
+\tableofcontents
+\endgroup
+\label{FrontMatterLastPage}
+\clearpage
+$endif$
+
+\setmainpagenumbers
+
+$if(title)$
+\maketitle
+$endif$
+
+$body$
+
+\end{document}

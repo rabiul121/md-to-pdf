@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "md-to-pdf"
+version = "1.0.0"
+description = "Multilingual Markdown to PDF converter (Bengali, Arabic, English, Emojis)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+# No PyPI dependencies — relies on pandoc + XeLaTeX binaries installed by setup scripts.
+dependencies = []
+
+[project.scripts]
+md-to-pdf = "src.converter:launch_gui"
+md-to-pdf-cli = "src.converter:cli_interactive_flow"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
