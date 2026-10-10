@@ -6,6 +6,15 @@ param(
 $ErrorActionPreference = "Stop"
 $RepoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $Converter = Join-Path $RepoRoot "main.py"
+$VenvPython = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+if (Test-Path $VenvPython) {
+    $Arguments = @($Converter)
+    if ($Cli) { $Arguments += "--cli" }
+    if ($Auto) { $Arguments += "--auto" }
+    & $VenvPython @Arguments
+    exit $LASTEXITCODE
+}
+
 $Python = Get-Command python -ErrorAction SilentlyContinue
 if ($Python) {
     $Arguments = @($Converter)

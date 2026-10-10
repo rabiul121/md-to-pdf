@@ -34,7 +34,12 @@ echo "Installing Pandoc, XeLaTeX, Python, and font dependencies..."
     fonts-symbola \
     python3 \
     python3-tk \
+    python3-pip \
     fontconfig
+
+if [[ -f "$REPO_ROOT/requirements.txt" ]]; then
+    python3 -m pip install -r "$REPO_ROOT/requirements.txt" || true
+fi
 
 if [[ ! -d "$FONT_SOURCE" ]]; then
     echo "[ERROR] Bundled fonts directory not found: $FONT_SOURCE" >&2
@@ -48,4 +53,5 @@ find "$FONT_SOURCE" -type f \
     -exec cp -f {} "$USER_FONT_DIR/" \;
 fc-cache -f "$USER_FONT_DIR"
 
-echo "Setup complete. Start the app with bash run.sh or bash launchers/start.sh --cli."
+echo "Setup complete. Start the app with bash run.sh or bash launchers/start.sh."
+

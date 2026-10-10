@@ -1,8 +1,11 @@
 # Python runtime dependencies for md-to-pdf
-# The GUI uses tkinter (stdlib) — no third-party Python packages are required.
-# External binary dependencies (installed by scripts/*/install_dependencies.*):
+# Modern Material Design 3 UI powered by Flet:
+flet>=1.0.3
+
+# (Legacy Tkinter UI is included in Python standard library and requires no pip install)
+#
 # External binary dependencies (installed by scripts/*/setup.*):
 #   - pandoc          https://pandoc.org/
 #   - xelatex         (MiKTeX on Windows, texlive-xetex on Linux)
-#   - optional: libreoffice  (for .doc input)
+#   - optional: libreoffice   (for .doc input)
 #   - optional: ebook-convert (Calibre, for .mobi input)

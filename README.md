@@ -10,6 +10,7 @@ An automated, cross-platform workflow to convert multilingual Markdown documents
   - **Bengali**: Powered by **SolaimanLipi** (with Bold support)
   - **Arabic**: Powered by **Amiri** with right-to-left paragraph direction and right alignment for Arabic-containing paragraphs.
   - **English & General**: Powered by bundled **DejaVu Sans** by default, with additional font choices in the UI.
+  - **Book typography**: Bundles OFL-licensed EB Garamond, Alegreya, Alegreya Sans, Crimson Text, Della Respira, Libre Baskerville, and Playfair Display; their license texts are in `assets/fonts/english`. Baskerville BT files are also present, but their license provenance is not recorded. Minion Pro files are present and require the applicable commercial license. Check each font's license before commercial distribution. The book-print profiles use A5 pages, first-line indentation, and page numbers.
   - **Icons, Emojis & Symbols**: Uses Windows' Segoe UI families or bundled Noto families on Linux.
 - **Responsive Layout & Margin Overflow Prevention**:
   - Automatically balances inter-word spacing (`\sloppy`, `\emergencystretch`) so text never cuts off or overflows the margins, even on narrow mobile dimensions.
@@ -31,6 +32,7 @@ An automated, cross-platform workflow to convert multilingual Markdown documents
   - Include an optional table of contents with selectable left/center/right alignment and Classic, Minimal, or Decorative design.
   - The TOC title (`Table of Contents` or `সূচিপত্র`) uses a consistent 16pt size. Wrapped TOC entries align to the left edge, with leaders and page numbers aligned consistently.
 - **Light and Dark UI Themes**: Switch the desktop interface theme while the application is open.
+- **Windows theme integration**: The theme button cycles System, Light, and Dark. System mode follows Windows appearance, including changes made while the app is open, and the selected mode persists between launches.
 - **Font Size Presets**:
   - Standard (11pt), Medium (14pt), Large (17pt), or Custom (8pt - 36pt).
 - **Modern Graphical UI & Interactive CLI**:
@@ -40,8 +42,9 @@ An automated, cross-platform workflow to convert multilingual Markdown documents
 - **Output Controls**: Choose a custom PDF filename and destination folder, then open the output folder from the UI. Existing files are preserved; collisions use incrementing names such as `document_1.pdf` and `document_2.pdf`.
 - **Multilingual Layout**: Arabic-containing paragraphs are right-to-left and right-aligned. Bangla page labels render both current and total page digits in Bengali; TOC title alignment, design, and title size are configurable.
 - **Saved Profiles**: Quick presets include Mobile, PC, English, Bangla, Minimal, and Decorative. Select a profile to apply its values to the visible options; save named profiles in `profiles.json`. The GUI also restores the last-used customization on the next launch.
-- **Profile Safety**: Editing any setting marks the current profile as Custom. Built-in presets cannot be overwritten or deleted; save an edited preset under a custom name. User-created profiles can be updated or deleted.
+- **Profile Safety**: Use **Update Selected** to persist changes to the selected built-in or custom profile. Built-in profiles can be updated but not deleted; **Save as New** creates a separate custom profile. User-created profiles can also be updated or deleted.
 - **Auto-Convert (Watch Mode)**: Continuously monitors the selected input file and re-converts it when saved.
+- **User Guide**: Open the in-app Help button or read [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for control descriptions and workflows.
 
 ---
 
@@ -67,6 +70,11 @@ md-to-pdf/
 ---
 
 ## 1. Quick Installation
+
+### Windows installer
+Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-1.0.0.exe`. The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
+
+The setup executable installs per-user under `%LOCALAPPDATA%\Programs`, creates Start menu and desktop shortcuts, and uses `winget` or Scoop to install Pandoc and MiKTeX when missing. Dependency installation may request Windows permission or user confirmation. The app's profiles are stored under `%LOCALAPPDATA%\PDF Creator Studio`; generated PDFs go to `Documents\Markdown to PDF`. Uninstalling removes the app and shortcuts but keeps profiles and PDFs. The executable is not code-signed, so Windows SmartScreen may show an unrecognized-app warning when distributing it publicly.
 
 ### On Windows
 Run the automated installer by double-clicking:
@@ -108,21 +116,22 @@ The platform scripts all dispatch to the same Python application, so EPUB suppor
 
 ## 2. How to Use
 
-### Option A: Modern Graphical UI (Recommended)
+### Option A: Modern Material Design 3 UI (Default)
 
 1. **Windows:** Double-click `run.bat` from the project root.
    - PowerShell: `./launchers/start.ps1`
-   - Linux: `bash ./run.sh` (use `--cli` for the terminal wizard)
-   - *(or run `python main.py` or `python .` in terminal)*
-2. The UI window opens:
-  - **1. Select Input File**: Click **Browse...** for one supported document or **Batch...** for multiple documents.
-  - Set an optional output filename and destination folder; batch conversion keeps each input's basename.
-  - **2. Page Setup**: Choose paper size, portrait/landscape orientation, and a margin preset or custom margin.
-  - **3. Select Font Size**: Choose *Standard (11pt)*, *Medium (14pt)*, *Large (17pt)*, or enter a *Custom* size.
-  - **4. Typography and Document Layout**: Related settings are grouped into **Typography**, **TOC & Page Numbers**, and **Profiles** tabs. Bengali TOCs also use Bengali page digits, independently of footer-number language.
-  - **5. Theme and Mode**: Switch between light/dark UI and choose *Convert Once* or *Auto-Convert on File Save*.
-3. Click **🚀 Start PDF Conversion**.
-4. When finished, use **📂 Open PDF** or **Open output folder**.
+   - Linux: `bash ./run.sh`
+   - Direct: `python main.py`
+   - *Legacy Tkinter UI fallback:* `python main.py --legacy-gui`
+2. The modern Flutter/Material 3 studio opens:
+   - **Documents Tab**: Pick single or multiple documents via native dialogs, quick-select project files, and choose custom output filenames/directories.
+   - **Page & Geometry Tab**: Paper sizes (A4, Letter, A5, Mobile 100x160mm, PC), orientation, margin presets, and page border switches.
+   - **Typography Tab**: Bengali (SolaimanLipi, Kalpurush), Arabic (Amiri), English fonts, font sizes, line height multipliers, paragraph spacing, and indent.
+   - **TOC & Numbers Tab**: Table of Contents styling/language and customizable page numbering styles/languages.
+   - **Profiles Tab**: Load built-in profiles (Mobile, PC, Bangla, English, Minimal, Decorative) or save custom profiles.
+   - **Live Log & Execution**: Real-time compilation console with progress tracking, auto-watch mode, and direct "Open Generated PDF" action.
+3. Click **🚀 Convert to PDF**.
+4. When finished, use **Open Generated PDF** or **Open Output Folder**.
 
 ---
 

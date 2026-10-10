@@ -1,6 +1,10 @@
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+venv/
+build/
+/dist/*.exe
 
 # Generated PDFs in output folder
 output/*.pdf
@@ -28,3 +32,7 @@ Thumbs.db
 # Stray accidental output paths (e.g. from absolute-path bugs)
 CUsers*/
 Users/robi/
+
+# Build artifacts
+/dist/
+*.egg-info/

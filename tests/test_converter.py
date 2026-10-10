@@ -62,11 +62,11 @@ class ConverterOptionsTests(unittest.TestCase):
             self.assertIn("frontpagenumberlanguagebangla=true", command)
             front_bangla_text = next(argument for argument in command if argument.startswith("frontpagenumbertextbangla="))
             self.assertIn("পৃষ্ঠা", front_bangla_text)
-            self.assertIn("fontenglishfile=DejaVuSans.ttf", command)
-            self.assertIn("fontbengalifile=SolaimanLipi.ttf", command)
+            self.assertIn("fontenglishfile=DejaVuSans-Regular.ttf", command)
+            self.assertIn("fontbengalifile=SolaimanLipi-Regular.ttf", command)
             self.assertIn("fontarabicfile=Amiri-Regular.ttf", command)
             self.assertIn("fontheadinglatinfile=Inter-VariableFont_opsz,wght.ttf", command)
-            self.assertIn("fontheadingbengalifile=SolaimanLipi.ttf", command)
+            self.assertIn("fontheadingbengalifile=SolaimanLipi-Regular.ttf", command)
             self.assertTrue(any(argument.startswith("fontenglishpath=") and argument.endswith("/assets/fonts/english/") for argument in command))
             self.assertIn("lineheight=1.25", command)
             self.assertIn("paragraphspacing=9pt", command)
@@ -348,6 +348,43 @@ class ConverterOptionsTests(unittest.TestCase):
 
             self.assertEqual([success for _source, success, _result in results], [True, True])
             self.assertEqual([Path(result).name for _source, _success, result in results], ["first.pdf", "second.pdf"])
+
+    def test_plain_input_format_escapes_markdown_for_literal_text(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            source = Path(temporary_directory) / "draft.md"
+            source.write_text("# Not a heading\n- not a list", encoding="utf-8")
+            captured = {}
+
+            def fake_run(command, **_kwargs):
+                literal = next(
+                    (
+                        argument
+                        for argument in command
+                        if str(argument).endswith("-literal.md")
+                    ),
+                    None,
+                )
+                if literal is not None:
+                    captured["text"] = Path(literal).read_text(encoding="utf-8")
+                return converter.subprocess.CompletedProcess(command, 0, "", "")
+
+            with patch.object(converter, "find_executable", side_effect=["pandoc", "xelatex"]), patch.object(
+                converter.subprocess,
+                "run",
+                side_effect=fake_run,
+            ) as run:
+                success, _result = converter.convert_md_to_pdf(
+                    source,
+                    input_format="plain",
+                    log_func=lambda _message: None,
+                )
+
+        self.assertTrue(success)
+        command = run.call_args.args[0]
+        self.assertIn("--from=markdown+hard_line_breaks", command)
+        self.assertNotIn("--from=plain", command)
+        self.assertNotIn("--from=markdown", command)
+        self.assertEqual(captured["text"], "\\# Not a heading\n\\- not a list")
 
 
 if __name__ == "__main__":

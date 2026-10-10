@@ -24,9 +24,10 @@
 
 \usepackage{fontspec}
 $if(fontenglishfile)$
-\setmainfont[Path=$fontenglishpath$]{$fontenglishfile$}
+% File-based fonts need explicit style faces; otherwise \textbf uses regular.
+\setmainfont[Path=$fontenglishpath$,$if(fontenglishfeatures)$$fontenglishfeatures$$else$AutoFakeBold=2,AutoFakeSlant=0.2$endif$]{$fontenglishfile$}
 $else$
-\setmainfont{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+\setmainfont[AutoFakeBold=2,AutoFakeSlant=0.2]{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
 $endif$
 $if(fontheadinglatinfile)$
   $if(boldheadings)$
@@ -52,9 +53,9 @@ $else$
 $endif$
 % Bengali font: SolaimanLipi
 $if(fontbengalifile)$
-\newfontfamily\bengalifont[Script=Bengali,Path=$fontbengalipath$]{$fontbengalifile$}
+\newfontfamily\bengalifont[Script=Bengali,Path=$fontbengalipath$,$if(fontbengalifeatures)$$fontbengalifeatures$$else$AutoFakeBold=2,AutoFakeSlant=0.2$endif$]{$fontbengalifile$}
 $else$
-\newfontfamily\bengalifont[Script=Bengali]{$if(fontbengali)$$fontbengali$$else$SolaimanLipi$endif$}
+\newfontfamily\bengalifont[Script=Bengali,AutoFakeBold=2,AutoFakeSlant=0.2]{$if(fontbengali)$$fontbengali$$else$SolaimanLipi$endif$}
 $endif$
 % Emoji and symbol fonts are installed from the bundled assets.
 $if(fontemojifile)$
@@ -79,9 +80,9 @@ $else$
 $endif$
 % Arabic font: Amiri (or Segoe UI / Arial)
 $if(fontarabicfile)$
-\newfontfamily\arabicfont[Script=Arabic,Path=$fontarabicpath$]{$fontarabicfile$}
+\newfontfamily\arabicfont[Script=Arabic,Path=$fontarabicpath$,$if(fontarabicfeatures)$$fontarabicfeatures$$else$AutoFakeBold=2,AutoFakeSlant=0.2$endif$]{$fontarabicfile$}
 $else$
-\newfontfamily\arabicfont[Script=Arabic]{$if(fontarabic)$$fontarabic$$else$Amiri$endif$}
+\newfontfamily\arabicfont[Script=Arabic,AutoFakeBold=2,AutoFakeSlant=0.2]{$if(fontarabic)$$fontarabic$$else$Amiri$endif$}
 $endif$
 \newcommand{\emoji}[1]{{\emojifont #1}} % Wrapper command used by Lua filter
 \newcommand{\emojisupplement}[1]{{\emojisupplementfont #1}}
@@ -90,6 +91,19 @@ $endif$
 
 \usepackage{graphicx} % For image inclusion
 \setkeys{Gin}{width=\linewidth,keepaspectratio} % Scale images to fit text width
+% Pandoc 3.x wraps images in \pandocbounded. Fit both page dimensions.
+\newsavebox{\pandocimagebox}
+\providecommand{\pandocbounded}[1]{%
+  \sbox{\pandocimagebox}{#1}%
+  \ifdim\dimexpr\ht\pandocimagebox+\dp\pandocimagebox\relax>0.8\textheight
+    \sbox{\pandocimagebox}{\resizebox*{!}{0.8\textheight}{\usebox{\pandocimagebox}}}%
+  \fi
+  \ifdim\wd\pandocimagebox>\linewidth
+    \resizebox{\linewidth}{!}{\usebox{\pandocimagebox}}%
+  \else
+    \usebox{\pandocimagebox}%
+  \fi
+}
 
 \usepackage{parskip}
 $if(firstlineindent)$
@@ -119,6 +133,7 @@ $endif$
   {\thesubsubsection}{1em}{}
 
 \usepackage{xcolor}
+\usepackage{soul}
 \usepackage{tocloft}
 $if(pageborder)$
 \usepackage{tikz}
