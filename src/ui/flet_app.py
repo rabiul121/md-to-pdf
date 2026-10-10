@@ -53,6 +53,8 @@ from src.core.editor import (
     quote_producer,
     strikethrough_producer,
 )
+from src.core.markdown_preview import markdown_to_controls
+from src.core.help_topics import HELP_TOPICS, search_help_topics
 
 
 async def main(page: ft.Page):
@@ -142,10 +144,18 @@ async def main(page: ft.Page):
         on_click=lambda e: open_in_system(output_dir_val[0]),
     )
 
+    def open_help_tab(_e=None):
+        """Jump to the built-in Help tab (falls back to the user guide file)."""
+        try:
+            tabs.selected_index = 6
+            page.update()
+        except NameError:
+            open_in_system(BASE_DIR / "docs" / "USER_GUIDE.md")
+
     help_btn = ft.IconButton(
         icon=ft.Icons.HELP_OUTLINE,
-        tooltip="Open user guide",
-        on_click=lambda e: open_in_system(BASE_DIR / "docs" / "USER_GUIDE.md"),
+        tooltip="Open the in-app Help tab",
+        on_click=open_help_tab,
     )
 
     app_bar = ft.AppBar(
@@ -787,6 +797,13 @@ async def main(page: ft.Page):
     editor_dirty = [False]
     last_editor_selection = [None]
     format_buttons = []
+    # Editor/preview split: the editor takes ``editor_flex`` of the row and the
+    # preview pane (when visible) takes the rest. The divider in between is
+    # draggable to resize both panes.
+    EDITOR_MIN_FLEX = 2
+    EDITOR_MAX_FLEX = 9
+    editor_flex = [6]
+    preview_open = [False]
 
     def refresh_editor_status():
         name = Path(editor_file_path[0]).name if editor_file_path[0] else "Untitled"
@@ -803,6 +820,7 @@ async def main(page: ft.Page):
             editor_dirty[0] = True
             refresh_editor_status()
             page.update()
+        refresh_preview()
 
     def handle_selection_change(e):
         try:
@@ -815,6 +833,7 @@ async def main(page: ft.Page):
         for button in format_buttons:
             button.disabled = plain
         refresh_editor_status()
+        refresh_preview()
         page.update()
 
     def apply_transform(producer):
@@ -981,6 +1000,204 @@ async def main(page: ft.Page):
         on_change=handle_editor_change,
         on_selection_change=handle_selection_change,
     )
+    # ---------------- Live Markdown Preview ----------------
+    def render_preview():
+        """Rebuild the preview pane from the current editor buffer."""
+        if editor_mode_dd.value == "Plain Text":
+            preview_body.controls = [
+                ft.Text(
+                    "Live preview renders Markdown. Switch the Format dropdown to "
+                    '"Markdown" to see the preview.',
+                    size=13,
+                    italic=True,
+                    color=ft.Colors.GREY_400,
+                )
+            ]
+        elif not (editor_field.value or "").strip():
+            preview_body.controls = [
+                ft.Text(
+                    "Nothing to preview yet. Start typing in the editor.",
+                    size=13,
+                    italic=True,
+                    color=ft.Colors.GREY_400,
+                )
+            ]
+        else:
+            preview_body.controls = markdown_to_controls(editor_field.value)
+
+    def refresh_preview():
+        if preview_open[0]:
+            render_preview()
+
+    def apply_editor_split():
+        """Apply the flex split between the editor and the preview pane."""
+        editor_pane.expand = editor_flex[0]
+        preview_pane.expand = 10 - editor_flex[0]
+
+    def resize_editor_split(e):
+        # Dragging the divider right grows the editor pane, left shrinks it.
+        editor_flex[0] = max(
+            EDITOR_MIN_FLEX,
+            min(EDITOR_MAX_FLEX, editor_flex[0] + int(e.delta_x // 40)),
+        )
+        apply_editor_split()
+        page.update()
+
+    def update_editor_layout():
+        """Show or hide the preview pane and divider next to the editor."""
+        if preview_open[0]:
+            editor_split_row.controls = [editor_pane, split_divider, preview_pane]
+        else:
+            editor_split_row.controls = [editor_pane]
+        preview_toggle_btn.icon = (
+            ft.Icons.VISIBILITY_OFF_OUTLINED if preview_open[0] else ft.Icons.VISIBILITY_OUTLINED
+        )
+        preview_toggle_btn.tooltip = (
+            "Hide Markdown preview" if preview_open[0] else "Show Markdown preview"
+        )
+        apply_editor_split()
+
+    def toggle_preview(_e=None):
+        preview_open[0] = not preview_open[0]
+        update_editor_layout()
+        if preview_open[0]:
+            render_preview()
+        page.update()
+
+    preview_toggle_btn = ft.OutlinedButton(
+        "Preview",
+        icon=ft.Icons.VISIBILITY_OUTLINED,
+        tooltip="Show Markdown preview",
+        on_click=toggle_preview,
+    )
+
+    preview_title = ft.Text("Markdown Preview", weight=ft.FontWeight.BOLD, size=13)
+    preview_body = ft.Column(
+        [
+            ft.Text(
+                "Nothing to preview yet. Start typing in the editor.",
+                size=13,
+                italic=True,
+                color=ft.Colors.GREY_400,
+            )
+        ],
+        spacing=8,
+        expand=True,
+        scroll=ft.ScrollMode.AUTO,
+    )
+
+    def _close_preview(_e=None):
+        if preview_open[0]:
+            toggle_preview(_e)
+
+    close_preview_btn = ft.IconButton(
+        icon=ft.Icons.CLOSE,
+        icon_size=18,
+        tooltip="Close preview",
+        on_click=_close_preview,
+    )
+    preview_pane = ft.Container(
+        content=ft.Column(
+            [
+                ft.Row(
+                    [preview_title, ft.Container(expand=True), close_preview_btn],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=4,
+                ),
+                ft.Divider(height=6),
+                preview_body,
+            ],
+            spacing=6,
+            expand=True,
+        ),
+        padding=ft.Padding(left=12, top=0, right=0, bottom=0),
+        expand=4,
+    )
+    split_divider = ft.GestureDetector(
+        content=ft.VerticalDivider(width=14, thickness=1, color=ft.Colors.OUTLINE_VARIANT),
+        drag_interval=1,
+        on_horizontal_drag_update=resize_editor_split,
+        mouse_cursor=ft.MouseCursor.RESIZE_LEFT_RIGHT,
+    )
+    editor_pane = ft.Container(
+        content=editor_field,
+        expand=6,
+        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+    )
+    editor_split_row = ft.Row(
+        [editor_pane],
+        expand=True,
+        spacing=0,
+        vertical_alignment=ft.CrossAxisAlignment.START,
+    )
+
+    # ---------------- Clear / Close current file ----------------
+    def _do_clear_editor():
+        editor_field.value = ""
+        editor_field.selection = None
+        editor_file_path[0] = None
+        editor_dirty[0] = False
+        last_editor_selection[0] = None
+        editor_mode_dd.value = "Markdown"
+        handle_editor_mode_change(None)
+        refresh_editor_status()
+        refresh_preview()
+        append_log("[EDITOR] Editor cleared and file closed.")
+        page.update()
+
+    def _dismiss_clear_dialog(_e=None):
+        clear_editor_dialog.open = False
+        if clear_editor_dialog in page.overlay:
+            page.overlay.remove(clear_editor_dialog)
+        page.update()
+
+    def _confirm_clear_editor(_e=None):
+        _dismiss_clear_dialog()
+        _do_clear_editor()
+
+    clear_editor_dialog = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Clear editor?"),
+        content=ft.Text(
+            "The editor has unsaved changes. Clear the editor and close the current "
+            "file anyway? This cannot be undone."
+        ),
+        actions=[
+            ft.TextButton("Cancel", on_click=_dismiss_clear_dialog),
+            ft.FilledButton("Clear anyway", on_click=_confirm_clear_editor),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+    def handle_clear_editor(_e=None):
+        if editor_dirty[0] or editor_file_path[0]:
+            if clear_editor_dialog not in page.overlay:
+                page.overlay.append(clear_editor_dialog)
+            clear_editor_dialog.open = True
+            page.update()
+        else:
+            append_log("[EDITOR] The editor is already empty.")
+            page.update()
+
+    # ---------------- Expand / restore window ----------------
+    def toggle_window_maximize(_e=None):
+        """Toggle the window between maximized and its previous size."""
+        page.window.maximized = not page.window.maximized
+        expand_editor_btn.icon = (
+            ft.Icons.FULLSCREEN_EXIT if page.window.maximized else ft.Icons.FULLSCREEN
+        )
+        expand_editor_btn.tooltip = (
+            "Restore window size" if page.window.maximized else "Maximize the window"
+        )
+        page.update()
+
+    expand_editor_btn = ft.IconButton(
+        icon=ft.Icons.FULLSCREEN,
+        icon_size=20,
+        tooltip="Maximize the window",
+        on_click=toggle_window_maximize,
+    )
+
     editor_toolbar = ft.Row(
         [
             format_button(ft.Icons.FORMAT_BOLD, "Bold", bold_producer()),
@@ -1032,6 +1249,7 @@ async def main(page: ft.Page):
                                             size=16,
                                         ),
                                         ft.Container(expand=True),
+                                        expand_editor_btn,
                                         editor_mode_dd,
                                     ],
                                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -1065,6 +1283,13 @@ async def main(page: ft.Page):
                                 icon=ft.Icons.SAVE_AS,
                                 on_click=handle_save_as,
                             ),
+                            ft.OutlinedButton(
+                                "Clear / Close",
+                                icon=ft.Icons.DELETE_OUTLINE,
+                                tooltip="Clear the editor and close the current file",
+                                on_click=handle_clear_editor,
+                            ),
+                            preview_toggle_btn,
                             editor_convert_btn,
                         ],
                         # Row(wrap=True) is a Flutter Wrap, which cannot hold
@@ -1076,7 +1301,7 @@ async def main(page: ft.Page):
                         run_spacing=8,
                     ),
                 ),
-                editor_field,
+                editor_split_row,
             ],
             spacing=12,
             expand=True,
@@ -1299,6 +1524,146 @@ async def main(page: ft.Page):
         style=ft.ButtonStyle(padding=18),
     )
 
+    # ---------------- Help Tab ----------------
+    help_selected_topic = [None]
+    help_search_field = ft.TextField(
+        label="Search help topics",
+        hint_text="Type to filter topics, e.g. 'preview', 'fonts', 'toc'",
+        prefix_icon=ft.Icons.SEARCH,
+        dense=True,
+        expand=True,
+        # Deferred so the handler can be defined after the control.
+        on_change=lambda e: handle_help_search(e),
+    )
+    help_results_count = ft.Text("", size=12, color=ft.Colors.GREY_400)
+    help_topic_list = ft.Column(spacing=2, expand=True, scroll=ft.ScrollMode.AUTO)
+    help_topic_content = ft.Column(spacing=8, expand=True, scroll=ft.ScrollMode.AUTO)
+
+    def render_help_list(matches):
+        help_topic_list.controls = [help_topic_card(topic) for topic in matches]
+
+    def render_help_topic(topic):
+        help_selected_topic[0] = topic["title"] if topic else None
+        help_topic_content.controls = (
+            markdown_to_controls(topic["body"])
+            if topic
+            else [
+                ft.Text(
+                    "Select a topic on the left, or search for a keyword.",
+                    italic=True,
+                    color=ft.Colors.GREY_400,
+                )
+            ]
+        )
+
+    def handle_help_search(_e=None):
+        matches = search_help_topics(help_search_field.value)
+        help_results_count.value = (
+            f"{len(matches)} topic{'s' if len(matches) != 1 else ''} found"
+        )
+        render_help_list(matches)
+        if help_selected_topic[0] not in {topic["title"] for topic in matches}:
+            render_help_topic(matches[0] if matches else None)
+        else:
+            render_help_topic(
+                next(
+                    (topic for topic in matches if topic["title"] == help_selected_topic[0]),
+                    None,
+                )
+            )
+        page.update()
+
+    def help_topic_card(topic):
+        selected = topic["title"] == help_selected_topic[0]
+        return ft.Card(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(topic["title"], weight=ft.FontWeight.W_600, size=13),
+                        ft.Text(
+                            topic["summary"],
+                            size=12,
+                            color=ft.Colors.GREY_400,
+                        ),
+                    ],
+                    spacing=2,
+                    tight=True,
+                ),
+                padding=10,
+                data=topic["title"],
+                on_click=lambda _e, t=topic: _select_help_topic(t),
+                ink=True,
+                bgcolor=ft.Colors.BLUE_900 if selected else None,
+            ),
+            margin=ft.Margin(bottom=4, left=0, right=0, top=0),
+        )
+
+    def _select_help_topic(topic):
+        render_help_topic(topic)
+        render_help_list(search_help_topics(help_search_field.value))
+        page.update()
+
+    render_help_list(HELP_TOPICS)
+    render_help_topic(HELP_TOPICS[0])
+    help_results_count.value = f"{len(HELP_TOPICS)} topics found"
+
+    help_tab = ft.Container(
+        expand=True,
+        content=ft.Column(
+            [
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Text("Help", weight=ft.FontWeight.BOLD, size=16),
+                                ft.Row(
+                                    [help_search_field, help_results_count],
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    spacing=12,
+                                ),
+                            ],
+                            spacing=10,
+                        ),
+                        padding=16,
+                    )
+                ),
+                ft.Row(
+                    [
+                        ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Text(
+                                        "Topics",
+                                        weight=ft.FontWeight.W_600,
+                                        size=13,
+                                    ),
+                                    ft.Divider(height=4),
+                                    help_topic_list,
+                                ],
+                                spacing=4,
+                                expand=True,
+                            ),
+                            width=260,
+                            expand=True,
+                        ),
+                        ft.VerticalDivider(width=1, thickness=1),
+                        ft.Container(
+                            content=help_topic_content,
+                            expand=True,
+                            padding=ft.Padding(left=12, top=0, right=0, bottom=0),
+                        ),
+                    ],
+                    expand=True,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
+                    spacing=8,
+                ),
+            ],
+            spacing=12,
+            expand=True,
+        ),
+        padding=10,
+    )
+
     # ---------------- Assemble Tabs ----------------
     tab_bar = ft.TabBar(
         tabs=[
@@ -1308,6 +1673,7 @@ async def main(page: ft.Page):
             ft.Tab(label="Typography", icon=ft.Icons.FONT_DOWNLOAD_OUTLINED),
             ft.Tab(label="TOC & Numbers", icon=ft.Icons.FORMAT_LIST_NUMBERED),
             ft.Tab(label="Profiles", icon=ft.Icons.BOOKMARKS_OUTLINED),
+            ft.Tab(label="Help", icon=ft.Icons.HELP_OUTLINE),
         ]
     )
 
@@ -1320,11 +1686,12 @@ async def main(page: ft.Page):
             typography_tab,
             toc_tab,
             profiles_tab,
+            help_tab,
         ],
     )
 
     tabs = ft.Tabs(
-        length=6,
+        length=7,
         selected_index=0,
         expand=True,
         content=ft.Column(

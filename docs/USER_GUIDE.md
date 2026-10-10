@@ -26,7 +26,14 @@ The **Editor** tab (the first tab) lets you write or paste Markdown or plain tex
 3. **Format** switches between Markdown and Plain Text. Plain Text converts your words literally with no Markdown parsing and disables the formatting toolbar.
 4. **Open...** loads an existing `.md`, `.markdown`, or `.txt` file into the editor.
 5. **Save** writes the document to its current file. **Save As...** saves the buffer to a new location. The status line next to the save buttons shows the current file and warns about unsaved changes.
-6. **Convert Editor to PDF** converts the buffer using all settings from the other tabs. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
+6. **Clear / Close** empties the editor and closes the current file. If there are unsaved changes, the app asks for confirmation first.
+7. **Preview** opens a live Markdown preview pane beside the editor. It refreshes as you type, so it always mirrors the editor buffer. Drag the vertical handle between the two panes to resize them, and press the eye button again (or the X in the preview) to close the pane.
+8. The expand icon next to **Format** toggles the window between a normal and a maximized size, giving the editor more room.
+9. **Convert Editor to PDF** converts the buffer using all settings from the other tabs. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
+
+## Help
+
+The **Help** tab (and the ? button in the title bar) opens the built-in help. Type in the **Search** box to filter the topic list by title, summary, or body text, then click a topic to read it. Topics are rendered with the same Markdown engine as the editor preview. The full manual also stays available in `docs/USER_GUIDE.md`.
 
 ## Page and geometry
 
