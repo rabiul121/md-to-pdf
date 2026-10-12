@@ -287,6 +287,7 @@ def convert_md_to_pdf(
     paragraph_spacing="6pt",
     copy_friendly_text=False,
     input_format=None,
+    highlight_style="tango",
 ):
     """Convert a supported document to PDF using Pandoc and XeLaTeX."""
     ensure_env_path()
@@ -398,6 +399,8 @@ def convert_md_to_pdf(
         )),
         "-V", f"fontsize={fontsize_val}"
     ]
+    if highlight_style:
+        cmd.append(f"--highlight-style={highlight_style}")
 
     if input_format == "plain":
         # Pandoc has no plain-text reader; escaped Markdown keeps text literal.

@@ -164,6 +164,33 @@ class ModularArchitectureTests(unittest.TestCase):
         self.assertNotIn("--from=plain", command)
         self.assertNotIn("--from=markdown", command)
 
+    def test_engine_passes_theme_highlight_style_to_pandoc(self):
+        import tempfile
+        from unittest.mock import patch
+        from src.core import engine
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            source = Path(temporary_directory) / "code.md"
+            source.write_text("```python\nprint(1)\n```", encoding="utf-8")
+
+            with patch.object(engine, "find_executable", side_effect=["pandoc", "xelatex"]), patch.object(
+                engine.subprocess,
+                "run",
+                return_value=engine.subprocess.CompletedProcess([], 0, "", ""),
+            ) as run:
+                success, _result = engine.convert_md_to_pdf(
+                    source,
+                    highlight_style="breezedark",
+                    log_func=lambda _message: None,
+                )
+
+        self.assertTrue(success)
+        self.assertIn("--highlight-style=breezedark", run.call_args.args[0])
+        template_source = Path(engine.TEMPLATE_PATH).read_text(encoding="utf-8")
+        self.assertIn("$highlighting-macros$", template_source)
+        self.assertIn("$if(highlighting-macros)$", template_source)
+        self.assertIn(r"\newenvironment{Shaded}", template_source)
+
     def test_flet_app_main_initializes_without_errors(self):
         import asyncio
         from unittest.mock import MagicMock, patch

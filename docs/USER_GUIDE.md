@@ -27,9 +27,11 @@ The **Editor** tab (the first tab) lets you write or paste Markdown or plain tex
 4. **Open...** loads an existing `.md`, `.markdown`, or `.txt` file into the editor.
 5. **Save** writes the document to its current file. **Save As...** saves the buffer to a new location. The status line next to the save buttons shows the current file and warns about unsaved changes.
 6. **Clear / Close** empties the editor and closes the current file. If there are unsaved changes, the app asks for confirmation first.
-7. **Preview** opens a live Markdown preview pane beside the editor. It refreshes as you type, so it always mirrors the editor buffer. Drag the vertical handle between the two panes to resize them, and press the eye button again (or the X in the preview) to close the pane.
+7. The **eye icon** opens a live preview pane beside the editor. It refreshes as you type or apply formatting. Drag the vertical handle to resize the panes; both keep at least 30% of the available width. Press the eye icon again (or the X in the preview) to close it. Markdown preview supports fenced and indented code, task lists, nested lists, tables, quotes, and reference links. Code blocks use syntax highlighting that follows the light/dark app theme. Footnote references (`[^note]` with a `[^note]: ...` definition) appear as numbered references with a Footnotes section at the bottom. Plain Text mode previews the text literally.
 8. The expand icon next to **Format** toggles the window between a normal and a maximized size, giving the editor more room.
-9. **Convert Editor to PDF** converts the buffer using all settings from the other tabs. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
+9. **Export PDF** converts the buffer using all settings from the other tabs. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
+
+The editor uses a compact icon-based file row and a single-line formatting toolbar (scroll horizontally if needed). Hover over an icon to see its action. The conversion log starts collapsed in the Editor tab to leave more room for writing; use its chevron to expand it. Other tabs expand the log automatically. The preview is not a PDF page-layout preview; exported pagination and typography still follow the conversion settings.
 
 ## Help
 
@@ -44,7 +46,7 @@ The **Help** tab (and the ? button in the title bar) opens the built-in help. Ty
 
 ## Typography
 
-- **Search fonts** filters all four font menus as you type. Project fonts appear first; installed system fonts follow alphabetically.
+- Each font selector is an editable, searchable dropdown. Type the first letters of a family (for example `A` then `Ar`) to filter the menu; the first match is highlighted and Enter or a click commits it. Project/bundled fonts appear first; installed system fonts follow alphabetically.
 - **Bengali Font** and **Arabic Font** select script faces. The converter uses script coverage fallback for headings.
 - **English Font** sets body text; **Heading Font** sets Latin headings independently.
 - **Font Size Preset** supports Standard (11 pt), Medium (14 pt), Large (17 pt), and Custom. Custom values are in points.
@@ -77,6 +79,8 @@ Bundled font files are in `assets/fonts`. Some selectable commercial or operatin
 3. **Open Generated PDF** becomes available after a successful conversion. The folder button in the title bar opens the output directory.
 
 The conversion log shows progress and errors. Use its copy button to copy the full log; individual entries can also be selected.
+
+Syntax-highlighted code blocks are exported with Pandoc's matching highlight style: `tango` for the light theme and `breezedark` for the dark theme.
 
 ## Troubleshooting
 

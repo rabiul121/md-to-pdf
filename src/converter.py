@@ -311,7 +311,7 @@ def find_executable(name):
                 return str(cand)
     return None
 
-def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Medium", custom_font_size=None, output_file=None, log_func=print, english_font="DejaVu Sans", bengali_font="SolaimanLipi", arabic_font="Amiri", margin_choice="Page default", custom_margin=None, orientation="Portrait", page_numbers=False, page_number_style="arabic", page_number_format="Page 1 of 10", page_number_position="Middle", page_number_size="9pt", front_page_numbers=False, front_page_number_style="roman", front_page_number_format="1", front_page_number_position="Middle", front_page_number_size="9pt", front_page_number_language="English", indent_first_line=False, indent_amount="0.25in", center_headings=True, bold_headings=True, include_toc=True, beautify_toc=True, output_name=None, output_directory=None, toc_language="English", page_number_language="English", page_border=False, toc_alignment="Center", toc_design="Classic", heading_font="DejaVu Sans", hyphenation=True, line_height="1.1", paragraph_spacing="6pt", copy_friendly_text=False, input_format=None):
+def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Medium", custom_font_size=None, output_file=None, log_func=print, english_font="DejaVu Sans", bengali_font="SolaimanLipi", arabic_font="Amiri", margin_choice="Page default", custom_margin=None, orientation="Portrait", page_numbers=False, page_number_style="arabic", page_number_format="Page 1 of 10", page_number_position="Middle", page_number_size="9pt", front_page_numbers=False, front_page_number_style="roman", front_page_number_format="1", front_page_number_position="Middle", front_page_number_size="9pt", front_page_number_language="English", indent_first_line=False, indent_amount="0.25in", center_headings=True, bold_headings=True, include_toc=True, beautify_toc=True, output_name=None, output_directory=None, toc_language="English", page_number_language="English", page_border=False, toc_alignment="Center", toc_design="Classic", heading_font="DejaVu Sans", hyphenation=True, line_height="1.1", paragraph_spacing="6pt", copy_friendly_text=False, input_format=None, highlight_style="tango"):
     """Convert a supported document to PDF using Pandoc and XeLaTeX."""
     ensure_env_path()
 
@@ -423,6 +423,8 @@ def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Mediu
         )),
         "-V", f"fontsize={fontsize_val}"
     ]
+    if highlight_style:
+        cmd.append(f"--highlight-style={highlight_style}")
 
     if input_format == "plain":
         # Pandoc has no plain-text reader; escaped Markdown keeps text literal.

@@ -36,7 +36,6 @@ from src.core.profiles import (
 from src.core.engine import (
     convert_md_to_pdf,
     convert_many_to_pdf,
-    filter_font_families,
     get_font_families,
     open_in_system,
 )
@@ -65,12 +64,20 @@ async def main(page: ft.Page):
         initial_theme_mode = ft.ThemeMode.SYSTEM
 
     page.title = "PDF Creator Studio"
-    page.window.width = 980
+    page.window.width = 1180
     page.window.height = 860
     page.window.min_width = 800
     page.window.min_height = 680
     page.theme_mode = initial_theme_mode
     page.padding = 16
+
+    def is_light_theme():
+        """Resolve System mode against the OS brightness for code palettes."""
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            return True
+        if page.theme_mode == ft.ThemeMode.DARK:
+            return False
+        return page.platform_brightness == ft.Brightness.LIGHT
 
     # State tracking
     selected_files = []
@@ -120,6 +127,7 @@ async def main(page: ft.Page):
         page.theme_mode = theme_cycle[(current_index + 1) % len(theme_cycle)]
         update_theme_button()
         apply_log_theme()
+        refresh_preview()
         save_last_used_settings(
             collect_current_settings(),
             selected_profile=profile_dropdown.value,
@@ -129,6 +137,7 @@ async def main(page: ft.Page):
     def handle_platform_brightness_change(_e):
         if page.theme_mode == ft.ThemeMode.SYSTEM:
             apply_log_theme()
+            refresh_preview()
             page.update()
 
     theme_btn = ft.IconButton(
@@ -390,22 +399,74 @@ async def main(page: ft.Page):
         "Headings": heading_font_dd,
     }
 
-    def filter_font_options(e):
-        query = font_search_field.value or ""
-        for role, dropdown in font_dropdowns.items():
-            matches = filter_font_families(query, font_families[role])
-            if dropdown.value and dropdown.value not in matches:
-                matches.insert(0, dropdown.value)
-            dropdown.options = [ft.dropdown.Option(family) for family in matches]
+    font_dropdown_roles = {id(dropdown): role for role, dropdown in font_dropdowns.items()}
+    selected_font_values = {}
+    font_search_queries = {}
+
+    def handle_font_focus(e):
+        dropdown = e.control
+        if dropdown.value is not None:
+            selected_font_values[id(dropdown)] = dropdown.value
+        font_search_queries[id(dropdown)] = ""
+        # Clear the selected label so the first keystroke starts a fresh query
+        # (Flet's editable dropdown otherwise appends to the current value).
+        dropdown.value = None
         page.update()
 
-    font_search_field = ft.TextField(
-        label="Search fonts",
-        hint_text="Filter project and installed fonts",
-        prefix_icon=ft.Icons.SEARCH,
-        dense=True,
-        on_change=filter_font_options,
-    )
+    def handle_font_text_change(e):
+        dropdown = e.control
+        query = (e.data if e.data is not None else dropdown.text or "").strip()
+        font_search_queries[id(dropdown)] = query
+        role = font_dropdown_roles.get(id(dropdown))
+        if not role or not query:
+            return
+        folded = query.casefold()
+        exact = next(
+            (family for family in font_families[role] if family.casefold() == folded),
+            None,
+        )
+        if exact and dropdown.value != exact:
+            dropdown.value = exact
+            selected_font_values[id(dropdown)] = exact
+            page.update()
+
+    def handle_font_blur(e):
+        dropdown = e.control
+        if dropdown.value is not None:
+            return
+        query = font_search_queries.get(id(dropdown), "").strip().casefold()
+        role = font_dropdown_roles.get(id(dropdown))
+        exact = (
+            next(
+                (family for family in font_families[role] if family.casefold() == query),
+                None,
+            )
+            if role and query
+            else None
+        )
+        dropdown.value = exact or selected_font_values.get(id(dropdown))
+        font_search_queries[id(dropdown)] = ""
+        page.update()
+
+    def handle_font_select(e):
+        dropdown = e.control
+        value = e.data if e.data is not None else dropdown.value
+        dropdown.value = value
+        selected_font_values[id(dropdown)] = value
+        font_search_queries[id(dropdown)] = ""
+
+    for font_dropdown in font_dropdowns.values():
+        font_dropdown.editable = True
+        font_dropdown.enable_filter = True
+        font_dropdown.enable_search = True
+        font_dropdown.leading_icon = ft.Icons.SEARCH
+        font_dropdown.hint_text = "Type to search fonts"
+        font_dropdown.dense = True
+        font_dropdown.menu_height = 280
+        font_dropdown.on_focus = handle_font_focus
+        font_dropdown.on_blur = handle_font_blur
+        font_dropdown.on_text_change = handle_font_text_change
+        font_dropdown.on_select = handle_font_select
 
     font_size_dd = ft.Dropdown(
         label="Font Size Preset",
@@ -446,7 +507,6 @@ async def main(page: ft.Page):
                         content=ft.Column(
                             [
                                 ft.Text("Multilingual Fonts", weight=ft.FontWeight.BOLD, size=16),
-                                font_search_field,
                                 ft.Row([bengali_font_dd, arabic_font_dd], spacing=16),
                                 ft.Row([english_font_dd, heading_font_dd], spacing=16),
                             ],
@@ -627,6 +687,7 @@ async def main(page: ft.Page):
             except ValueError:
                 page.theme_mode = ft.ThemeMode.SYSTEM
             update_theme_button()
+            refresh_preview()
         if "page_size_choice" in settings and settings["page_size_choice"] in PAGE_SIZES:
             page_size_dropdown.value = settings["page_size_choice"]
         if "orientation" in settings:
@@ -800,9 +861,9 @@ async def main(page: ft.Page):
     # Editor/preview split: the editor takes ``editor_flex`` of the row and the
     # preview pane (when visible) takes the rest. The divider in between is
     # draggable to resize both panes.
-    EDITOR_MIN_FLEX = 2
-    EDITOR_MAX_FLEX = 9
-    editor_flex = [6]
+    EDITOR_MIN_FLEX = 3
+    EDITOR_MAX_FLEX = 7
+    editor_flex = [5.0]
     preview_open = [False]
 
     def refresh_editor_status():
@@ -819,8 +880,8 @@ async def main(page: ft.Page):
         if not editor_dirty[0]:
             editor_dirty[0] = True
             refresh_editor_status()
-            page.update()
         refresh_preview()
+        page.update()
 
     def handle_selection_change(e):
         try:
@@ -855,12 +916,17 @@ async def main(page: ft.Page):
             editor_dirty[0] = True
             refresh_editor_status()
         page.run_task(editor_field.focus)
+        refresh_preview()
         page.update()
 
     def format_button(icon, tooltip, producer):
         button = ft.IconButton(
             icon=icon,
             tooltip=tooltip,
+            icon_size=18,
+            width=32,
+            height=32,
+            style=ft.ButtonStyle(padding=0),
             on_click=lambda _e, action=producer: apply_transform(action),
         )
         format_buttons.append(button)
@@ -966,7 +1032,7 @@ async def main(page: ft.Page):
         label="Format",
         value="Markdown",
         options=[ft.dropdown.Option("Markdown"), ft.dropdown.Option("Plain Text")],
-        width=180,
+        width=150,
         dense=True,
         on_select=handle_editor_mode_change,
     )
@@ -977,7 +1043,7 @@ async def main(page: ft.Page):
     )
     editor_field = ft.TextField(
         multiline=True,
-        min_lines=10,
+        fit_parent_size=True,
         expand=True,
         value="",
         hint_text="Paste or type Markdown or plain text here, then convert it directly to PDF.",
@@ -1006,11 +1072,9 @@ async def main(page: ft.Page):
         if editor_mode_dd.value == "Plain Text":
             preview_body.controls = [
                 ft.Text(
-                    "Live preview renders Markdown. Switch the Format dropdown to "
-                    '"Markdown" to see the preview.',
-                    size=13,
-                    italic=True,
-                    color=ft.Colors.GREY_400,
+                    editor_field.value or "Nothing to preview yet.",
+                    size=14,
+                    selectable=True,
                 )
             ]
         elif not (editor_field.value or "").strip():
@@ -1023,7 +1087,10 @@ async def main(page: ft.Page):
                 )
             ]
         else:
-            preview_body.controls = markdown_to_controls(editor_field.value)
+            preview_body.controls = markdown_to_controls(
+                editor_field.value,
+                dark_theme=not is_light_theme(),
+            )
 
     def refresh_preview():
         if preview_open[0]:
@@ -1031,14 +1098,19 @@ async def main(page: ft.Page):
 
     def apply_editor_split():
         """Apply the flex split between the editor and the preview pane."""
-        editor_pane.expand = editor_flex[0]
-        preview_pane.expand = 10 - editor_flex[0]
+        editor_pane.expand = round(editor_flex[0] * 100)
+        preview_pane.expand = 1000 - editor_pane.expand
 
     def resize_editor_split(e):
         # Dragging the divider right grows the editor pane, left shrinks it.
+        # NOTE: Flet 1.x removed the flat ``delta_x``/``delta_y`` attributes from
+        # DragUpdateEvent. For a horizontal-drag handler the movement since the
+        # previous update is reported via ``primary_delta`` (``None`` for
+        # proxied events such as accessibility), so fall back to 0.
+        delta_x = e.primary_delta or 0
         editor_flex[0] = max(
             EDITOR_MIN_FLEX,
-            min(EDITOR_MAX_FLEX, editor_flex[0] + int(e.delta_x // 40)),
+            min(EDITOR_MAX_FLEX, editor_flex[0] + delta_x * 10 / max((page.width or 1180) - 80, 1)),
         )
         apply_editor_split()
         page.update()
@@ -1064,8 +1136,7 @@ async def main(page: ft.Page):
             render_preview()
         page.update()
 
-    preview_toggle_btn = ft.OutlinedButton(
-        "Preview",
+    preview_toggle_btn = ft.IconButton(
         icon=ft.Icons.VISIBILITY_OUTLINED,
         tooltip="Show Markdown preview",
         on_click=toggle_preview,
@@ -1093,6 +1164,8 @@ async def main(page: ft.Page):
     close_preview_btn = ft.IconButton(
         icon=ft.Icons.CLOSE,
         icon_size=18,
+        width=32,
+        height=32,
         tooltip="Close preview",
         on_click=_close_preview,
     )
@@ -1111,24 +1184,27 @@ async def main(page: ft.Page):
             expand=True,
         ),
         padding=ft.Padding(left=12, top=0, right=0, bottom=0),
-        expand=4,
+        expand=500,
     )
     split_divider = ft.GestureDetector(
-        content=ft.VerticalDivider(width=14, thickness=1, color=ft.Colors.OUTLINE_VARIANT),
+        content=ft.Container(
+            content=ft.VerticalDivider(width=14, thickness=1, color=ft.Colors.OUTLINE_VARIANT),
+            width=14,
+        ),
         drag_interval=1,
         on_horizontal_drag_update=resize_editor_split,
         mouse_cursor=ft.MouseCursor.RESIZE_LEFT_RIGHT,
     )
     editor_pane = ft.Container(
         content=editor_field,
-        expand=6,
+        expand=500,
         clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
     )
     editor_split_row = ft.Row(
         [editor_pane],
         expand=True,
         spacing=0,
-        vertical_alignment=ft.CrossAxisAlignment.START,
+        vertical_alignment=ft.CrossAxisAlignment.STRETCH,
     )
 
     # ---------------- Clear / Close current file ----------------
@@ -1146,9 +1222,13 @@ async def main(page: ft.Page):
         page.update()
 
     def _dismiss_clear_dialog(_e=None):
-        clear_editor_dialog.open = False
-        if clear_editor_dialog in page.overlay:
-            page.overlay.remove(clear_editor_dialog)
+        # Flet 1.x dialogs are managed by the page's internal dialog stack.
+        # Close programmatically with pop_dialog() instead of toggling
+        # ``open``/overlay by hand - the legacy pattern never signals Flutter
+        # to dismiss the dialog, so it stayed on screen. Only pop if our
+        # dialog is the one currently open.
+        if clear_editor_dialog.open:
+            page.pop_dialog()
         page.update()
 
     def _confirm_clear_editor(_e=None):
@@ -1171,9 +1251,11 @@ async def main(page: ft.Page):
 
     def handle_clear_editor(_e=None):
         if editor_dirty[0] or editor_file_path[0]:
-            if clear_editor_dialog not in page.overlay:
-                page.overlay.append(clear_editor_dialog)
-            clear_editor_dialog.open = True
+            # Flet 1.x: show_dialog() registers the dialog with the page's
+            # dialog stack and wires up dismissal cleanup. It raises if the
+            # dialog is already open, so guard first.
+            if not clear_editor_dialog.open:
+                page.show_dialog(clear_editor_dialog)
             page.update()
         else:
             append_log("[EDITOR] The editor is already empty.")
@@ -1194,6 +1276,8 @@ async def main(page: ft.Page):
     expand_editor_btn = ft.IconButton(
         icon=ft.Icons.FULLSCREEN,
         icon_size=20,
+        width=32,
+        height=32,
         tooltip="Maximize the window",
         on_click=toggle_window_maximize,
     )
@@ -1224,11 +1308,11 @@ async def main(page: ft.Page):
                 ft.Icons.HORIZONTAL_RULE, "Horizontal rule", horizontal_rule_producer()
             ),
         ],
-        wrap=True,
+        scroll=ft.ScrollMode.AUTO,
         spacing=2,
     )
     editor_convert_btn = ft.FilledButton(
-        "Convert Editor to PDF",
+        "Export PDF",
         icon=ft.Icons.ROCKET_LAUNCH,
         on_click=execute_editor_conversion,
     )
@@ -1237,76 +1321,42 @@ async def main(page: ft.Page):
         expand=True,
         content=ft.Column(
             [
-                ft.Card(
-                    content=ft.Container(
-                        content=ft.Column(
-                            [
-                                ft.Row(
-                                    [
-                                        ft.Text(
-                                            "Document Editor",
-                                            weight=ft.FontWeight.BOLD,
-                                            size=16,
-                                        ),
-                                        ft.Container(expand=True),
-                                        expand_editor_btn,
-                                        editor_mode_dd,
-                                    ],
-                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                                ),
-                                editor_toolbar,
-                                ft.Text(
-                                    "Select text and use the toolbar to apply Markdown formatting.",
-                                    size=12,
-                                    color=ft.Colors.GREY_400,
-                                ),
-                            ],
-                            spacing=10,
+                ft.Row(
+                    [
+                        ft.IconButton(
+                            icon=ft.Icons.FILE_OPEN,
+                            tooltip="Open document",
+                            on_click=handle_open_in_editor,
                         ),
-                        padding=16,
-                    )
+                        ft.IconButton(
+                            icon=ft.Icons.SAVE, tooltip="Save", on_click=handle_save_click
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.SAVE_AS,
+                            tooltip="Save As...",
+                            on_click=handle_save_as,
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            tooltip="Clear the editor and close the current file",
+                            on_click=handle_clear_editor,
+                        ),
+                        ft.Container(content=editor_status, expand=True),
+                        editor_mode_dd,
+                        preview_toggle_btn,
+                        expand_editor_btn,
+                        editor_convert_btn,
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=2,
                 ),
-                ft.Container(
-                    content=ft.Row(
-                        [
-                            editor_status,
-                            ft.OutlinedButton(
-                                "Open...",
-                                icon=ft.Icons.FILE_OPEN,
-                                on_click=handle_open_in_editor,
-                            ),
-                            ft.OutlinedButton(
-                                "Save", icon=ft.Icons.SAVE, on_click=handle_save_click
-                            ),
-                            ft.OutlinedButton(
-                                "Save As...",
-                                icon=ft.Icons.SAVE_AS,
-                                on_click=handle_save_as,
-                            ),
-                            ft.OutlinedButton(
-                                "Clear / Close",
-                                icon=ft.Icons.DELETE_OUTLINE,
-                                tooltip="Clear the editor and close the current file",
-                                on_click=handle_clear_editor,
-                            ),
-                            preview_toggle_btn,
-                            editor_convert_btn,
-                        ],
-                        # Row(wrap=True) is a Flutter Wrap, which cannot hold
-                        # expanded children; use alignment instead of a spacer.
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        wrap=True,
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                ),
+                editor_toolbar,
                 editor_split_row,
             ],
-            spacing=12,
+            spacing=6,
             expand=True,
         ),
-        padding=10,
+        padding=ft.Padding(left=4, top=4, right=4, bottom=0),
     )
 
     # ---------------- Bottom Status, Console & Actions ----------------
@@ -1316,6 +1366,26 @@ async def main(page: ft.Page):
     async def copy_log(_e):
         await clipboard.set("\n".join(log_messages))
 
+    log_expanded = [False]
+
+    def set_log_expanded(expanded):
+        log_expanded[0] = expanded
+        log_column.visible = expanded
+        log_container.height = 160 if expanded else 48
+        log_container.padding = 10 if expanded else 4
+        log_toggle_btn.icon = ft.Icons.EXPAND_LESS if expanded else ft.Icons.EXPAND_MORE
+        log_toggle_btn.tooltip = "Collapse conversion log" if expanded else "Expand conversion log"
+
+    def toggle_log(_e=None):
+        set_log_expanded(not log_expanded[0])
+        page.update()
+
+    log_toggle_btn = ft.IconButton(
+        icon=ft.Icons.EXPAND_MORE,
+        tooltip="Expand conversion log",
+        on_click=toggle_log,
+    )
+
     log_header = ft.Row(
         [
             ft.Text("Conversion Log", weight=ft.FontWeight.BOLD),
@@ -1324,6 +1394,7 @@ async def main(page: ft.Page):
                 tooltip="Copy log",
                 on_click=copy_log,
             ),
+            log_toggle_btn,
         ],
         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -1434,6 +1505,7 @@ async def main(page: ft.Page):
                 "hyphenation": settings["hyphenation"],
                 "line_height": settings["line_height"],
                 "copy_friendly_text": settings["copy_friendly_text"],
+                "highlight_style": "breezedark" if not is_light_theme() else "tango",
             }
         )
 
@@ -1545,7 +1617,7 @@ async def main(page: ft.Page):
     def render_help_topic(topic):
         help_selected_topic[0] = topic["title"] if topic else None
         help_topic_content.controls = (
-            markdown_to_controls(topic["body"])
+            markdown_to_controls(topic["body"], dark_theme=not is_light_theme())
             if topic
             else [
                 ft.Text(
@@ -1690,9 +1762,14 @@ async def main(page: ft.Page):
         ],
     )
 
+    def handle_tab_change(_e):
+        set_log_expanded(tabs.selected_index != 0)
+        page.update()
+
     tabs = ft.Tabs(
         length=7,
         selected_index=0,
+        on_change=handle_tab_change,
         expand=True,
         content=ft.Column(
             expand=True,
@@ -1702,6 +1779,8 @@ async def main(page: ft.Page):
             ],
         ),
     )
+
+    set_log_expanded(False)
 
     # Main view structure
     page.add(

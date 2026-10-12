@@ -302,7 +302,11 @@ $endif$
 \vfuzz=1pt
 
 \usepackage{framed}
+$if(highlighting-macros)$
+$highlighting-macros$
+$else$
 \newenvironment{Shaded}{\begin{framed}}{\end{framed}}
+$endif$
 
 \usepackage{fvextra}
 \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
