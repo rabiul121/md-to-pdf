@@ -3,6 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms
 $AppName = "PDF Creator Studio"
 $InstallRoot = Join-Path $env:LOCALAPPDATA "Programs\$AppName"
 $Payload = Join-Path $PSScriptRoot "app-payload.zip"
+$VersionFile = Join-Path $InstallRoot "version.txt"
 $UninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\md-to-pdf-studio"
 
 try {
@@ -26,6 +27,10 @@ try {
     if (-not (Test-Path -LiteralPath $Executable)) {
         throw "The application executable was not installed."
     }
+    if (-not (Test-Path -LiteralPath $VersionFile)) {
+        throw "The installed version metadata is missing."
+    }
+    $ProductVersion = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
 
     $Shell = New-Object -ComObject WScript.Shell
     $Desktop = [Environment]::GetFolderPath("DesktopDirectory")
@@ -42,7 +47,7 @@ try {
 
     New-Item -Path $UninstallKey -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name DisplayName -Value $AppName -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $UninstallKey -Name DisplayVersion -Value "1.0.0" -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $UninstallKey -Name DisplayVersion -Value $ProductVersion -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name Publisher -Value "md-to-pdf" -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name InstallLocation -Value $InstallRoot -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name DisplayIcon -Value "$Executable,0" -PropertyType String -Force | Out-Null

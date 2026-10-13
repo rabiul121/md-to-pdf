@@ -1,38 +1,50 @@
+# Python environments, bytecode, and package/build output
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 .venv/
 venv/
+env/
 build/
-/dist/*.exe
+dist/
+.installer-assets-stage/
+*.egg-info/
+.eggs/
+*.spec
 
-# Generated PDFs in output folder
+# Test, type-check, and lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Generated documents and TeX build artifacts
 output/*.pdf
 output/**/*.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
 
-# User-specific settings and locally supplied Windows system fonts
+# Per-user project settings and local Windows system fonts
 /profiles.json
 /assets/fonts/symbol/seguiemj.ttf
 /assets/fonts/symbol/seguisym.ttf
+/assets/fonts/coading/MonoLisaCodeTrial-*.ttf
+/assets/fonts/english/MonoLisaTextTrial-*.ttf
 /input/The Chestnut Man Bengali.docx
 /input/The Chestnut Man Bengali.md
 
-# LaTeX build artifacts
-*.log
-*.aux
-*.out
-*.toc
-
-# OS / IDE noise
+# Operating system and editor files
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 
-# Stray accidental output paths (e.g. from absolute-path bugs)
+# Stray output paths caused by old absolute-path bugs
 CUsers*/
 Users/robi/
-
-# Build artifacts
-/dist/
-*.egg-info/

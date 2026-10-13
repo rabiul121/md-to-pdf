@@ -311,7 +311,7 @@ def find_executable(name):
                 return str(cand)
     return None
 
-def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Medium", custom_font_size=None, output_file=None, log_func=print, english_font="DejaVu Sans", bengali_font="SolaimanLipi", arabic_font="Amiri", margin_choice="Page default", custom_margin=None, orientation="Portrait", page_numbers=False, page_number_style="arabic", page_number_format="Page 1 of 10", page_number_position="Middle", page_number_size="9pt", front_page_numbers=False, front_page_number_style="roman", front_page_number_format="1", front_page_number_position="Middle", front_page_number_size="9pt", front_page_number_language="English", indent_first_line=False, indent_amount="0.25in", center_headings=True, bold_headings=True, include_toc=True, beautify_toc=True, output_name=None, output_directory=None, toc_language="English", page_number_language="English", page_border=False, toc_alignment="Center", toc_design="Classic", heading_font="DejaVu Sans", hyphenation=True, line_height="1.1", paragraph_spacing="6pt", copy_friendly_text=False, input_format=None, highlight_style="tango"):
+def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Medium", custom_font_size=None, output_file=None, log_func=print, english_font="DejaVu Sans", bengali_font="SolaimanLipi", arabic_font="Amiri", margin_choice="Page default", custom_margin=None, orientation="Portrait", page_numbers=False, page_number_style="arabic", page_number_format="Page 1 of 10", page_number_position="Middle", page_number_size="9pt", front_page_numbers=False, front_page_number_style="roman", front_page_number_format="1", front_page_number_position="Middle", front_page_number_size="9pt", front_page_number_language="English", indent_first_line=False, indent_amount="0.25in", center_headings=True, bold_headings=True, include_toc=True, beautify_toc=True, output_name=None, output_directory=None, toc_language="English", page_number_language="English", page_border=False, toc_alignment="Center", toc_design="Classic", heading_font="DejaVu Sans", code_font="JetBrains Mono", hyphenation=True, line_height="1.1", paragraph_spacing="6pt", copy_friendly_text=False, input_format=None, highlight_style="tango"):
     """Convert a supported document to PDF using Pandoc and XeLaTeX."""
     ensure_env_path()
 
@@ -443,12 +443,21 @@ def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Mediu
     is_windows = sys.platform.startswith("win")
     bundled_emoji_font = resolve_bundled_font("Segoe UI Emoji", "symbol") if is_windows else resolve_bundled_font("Noto Emoji", "symbol")
     bundled_symbol_font = resolve_bundled_font("Segoe UI Symbol", "symbol") if is_windows else resolve_bundled_font("Noto Sans Symbols 2", "symbol")
+    bundled_mono_font = (
+        resolve_bundled_font(code_font, "coading")
+        or resolve_bundled_font(code_font, "coding")
+        or resolve_bundled_font(code_font, "english")
+        or resolve_font_file(code_font, "coading")
+        or resolve_font_file(code_font, "english")
+        or resolve_bundled_font("JetBrains Mono", "coading")
+    )
     bundled_fonts = {
         "fontenglish": resolve_font_file(english_font, "english"),
         "fontheadinglatin": heading_latin_font,
         "fontheadingbengali": heading_bengali_font,
         "fontbengali": resolve_font_file(bengali_font, "bengali"),
         "fontarabic": resolve_font_file(arabic_font, "arabic"),
+        "fontmono": bundled_mono_font,
         "fontemoji": bundled_emoji_font,
         "fontsymbol": bundled_symbol_font,
         "fontemojiSupplement": resolve_bundled_font("Noto Emoji", "symbol"),
@@ -459,13 +468,14 @@ def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Mediu
             filename, font_path = bundled_font
             font_file_vars[f"{name}file"] = filename
             font_file_vars[f"{name}path"] = font_path
-            if name in {"fontenglish", "fontbengali", "fontarabic"}:
+            if name in {"fontenglish", "fontbengali", "fontarabic", "fontmono"}:
                 font_file_vars[f"{name}features"] = font_style_features(bundled_font)
     template_vars = {
         "fontenglish": english_font,
         "fontheading": heading_font,
         "fontbengali": bengali_font,
         "fontarabic": arabic_font,
+        "fontmono": code_font,
         "fontemoji": "Segoe UI Emoji" if is_windows else "Noto Emoji",
         "fontsymbol": "Segoe UI Symbol" if is_windows else "Noto Sans Symbols 2",
         "fontcurrency": "Segoe UI" if is_windows else english_font,
@@ -575,7 +585,7 @@ def convert_md_to_pdf(input_file, page_size_choice="A4", font_size_choice="Mediu
         else:
             log_func(f"[ERROR] Pandoc/XeLaTeX conversion failed (Code {proc.returncode}):")
             if proc.stderr:
-                for line in proc.stderr.strip().splitlines()[-10:]:
+                for line in proc.stderr.strip().splitlines():
                     log_func(f"  {line}")
             return False, proc.stderr
     except Exception as e:

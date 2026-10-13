@@ -14,6 +14,11 @@ _NOTE_RE = re.compile(r"^ {0,3}\[\^([^\]]+)\]:[ \t]*(.*)$")
 _REFERENCE_RE = re.compile(r"(?<!\\)\[\^([^\]]+)\]")
 _CODE_SPAN_RE = re.compile(r"(`+).*?\1(?!`)", re.DOTALL)
 
+# Sentinel placed between body and footnotes so the renderer can substitute a
+# real thin ft.Divider instead of relying on Markdown's --- rule (which Flet
+# renders as a thick black bar).
+_FOOTNOTE_SENTINEL = "<!--FOOTNOTE_DIVIDER-->"
+
 
 def _prose_lines(lines):
     """Yield indexes outside fenced and four-space/tab-indented code."""
@@ -40,6 +45,9 @@ def prepare_markdown(markdown_text):
 
     Definitions may precede references and contain indented continuations.
     Unresolved and escaped references remain literal.
+
+    When footnotes are present the returned string contains _FOOTNOTE_SENTINEL
+    so the caller can insert a real thin Divider instead of a Markdown HR.
     """
     lines = (markdown_text or "").splitlines()
     definitions = {}
@@ -119,44 +127,63 @@ def prepare_markdown(markdown_text):
         notes.append("")
         cursor += 1
     if notes:
-        body.extend(["", "---", "", "### Footnotes", ""] + notes)
+        footnote_md = "\n".join(["**Footnotes**", ""] + notes)
+        return "\n".join(body) + f"\n\n{_FOOTNOTE_SENTINEL}\n\n" + footnote_md
     return "\n".join(body)
 
 
-def markdown_to_controls(markdown_text, code_theme=None, dark_theme=False):
-    """Return a content-sized Markdown control for a scrolling parent.
+def _make_markdown(value, code_theme, codeblock_background):
+    """Build a single ft.Markdown control with shared style settings."""
+    return ft.Markdown(
+        value=value,
+        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+        code_theme=code_theme,
+        selectable=True,
+        auto_follow_links=True,
+        shrink_wrap=True,
+        fit_content=False,
+        code_style_sheet=ft.MarkdownStyleSheet(
+            code_text_style=ft.TextStyle(font_family="monospace", size=13),
+        ),
+        md_style_sheet=ft.MarkdownStyleSheet(
+            p_text_style=ft.TextStyle(size=14),
+            code_text_style=ft.TextStyle(font_family="monospace", size=13),
+            block_spacing=10,
+            list_indent=24,
+            codeblock_padding=12,
+            codeblock_decoration=ft.BoxDecoration(
+                bgcolor=codeblock_background,
+                border_radius=ft.BorderRadius.all(6),
+            ),
+        ),
+    )
 
-    ``code_theme`` selects the syntax-highlighting palette. The caller can pass
-    the theme resolved from the page so the preview follows light/dark mode;
-    when omitted, the GitHub light palette keeps standalone callers stable.
+
+def markdown_to_controls(markdown_text, code_theme=None, dark_theme=False):
+    """Return a list of Flet controls rendering the given Markdown.
+
+    When footnotes are present a thin styled Divider is inserted between the
+    body and the footnotes section instead of relying on Markdown's --- rule
+    (which Flet renders as a thick black bar).
     """
     if not (markdown_text or "").strip():
         return []
     if code_theme is None:
         code_theme = ft.MarkdownCodeTheme.ATOM_ONE_DARK if dark_theme else ft.MarkdownCodeTheme.GITHUB
     codeblock_background = "#282C34" if dark_theme else "#F6F8FA"
-    return [
-        ft.Markdown(
-            value=prepare_markdown(markdown_text),
-            extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
-            code_theme=code_theme,
-            selectable=True,
-            auto_follow_links=True,
-            shrink_wrap=True,
-            fit_content=False,
-            code_style_sheet=ft.MarkdownStyleSheet(
-                code_text_style=ft.TextStyle(font_family="monospace", size=13),
+
+    prepared = prepare_markdown(markdown_text)
+
+    if _FOOTNOTE_SENTINEL in prepared:
+        body_part, footnote_part = prepared.split(_FOOTNOTE_SENTINEL, 1)
+        divider_color = "#BDC1C6" if not dark_theme else "#3C4043"
+        return [
+            _make_markdown(body_part.strip(), code_theme, codeblock_background),
+            ft.Container(
+                content=ft.Divider(height=1, thickness=1, color=divider_color),
+                margin=ft.Margin(top=8, bottom=8, left=0, right=0),
             ),
-            md_style_sheet=ft.MarkdownStyleSheet(
-                p_text_style=ft.TextStyle(size=14),
-                code_text_style=ft.TextStyle(font_family="monospace", size=13),
-                block_spacing=10,
-                list_indent=24,
-                codeblock_padding=12,
-                codeblock_decoration=ft.BoxDecoration(
-                    bgcolor=codeblock_background,
-                    border_radius=ft.BorderRadius.all(6),
-                ),
-            ),
-        )
-    ]
+            _make_markdown(footnote_part.strip(), code_theme, codeblock_background),
+        ]
+
+    return [_make_markdown(prepared, code_theme, codeblock_background)]

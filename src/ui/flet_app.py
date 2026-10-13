@@ -11,7 +11,6 @@ from pathlib import Path
 import flet as ft
 
 from src.core.constants import (
-    BASE_DIR,
     INPUT_DIR,
     OUTPUT_DIR,
     SUPPORTED_INPUT_EXTENSIONS,
@@ -21,6 +20,8 @@ from src.core.constants import (
     FONT_SIZES,
     PROJECT_FONT_CHOICES,
     HEADING_FONT_CHOICES,
+    CODING_FONT_CHOICES,
+    BASE_DIR,
     PROFILE_BASE_SETTINGS,
     BUILT_IN_PROFILES,
     LAST_USED_PROFILE,
@@ -56,12 +57,21 @@ from src.core.markdown_preview import markdown_to_controls
 from src.core.help_topics import HELP_TOPICS, search_help_topics
 
 
+def resolve_theme_mode(value=None):
+    """Resolve a persisted theme value, falling back to System mode."""
+    if value is None:
+        return ft.ThemeMode.SYSTEM
+    try:
+        return ft.ThemeMode(value)
+    except ValueError:
+        return ft.ThemeMode.SYSTEM
+
+
 async def main(page: ft.Page):
     last_used_settings = load_last_used_settings()
-    try:
-        initial_theme_mode = ft.ThemeMode(last_used_settings.get("theme_mode", ft.ThemeMode.SYSTEM.value))
-    except ValueError:
-        initial_theme_mode = ft.ThemeMode.SYSTEM
+    initial_theme_mode = resolve_theme_mode(
+        last_used_settings.get("theme_mode", ft.ThemeMode.SYSTEM.value)
+    )
 
     page.title = "PDF Creator Studio"
     page.window.width = 1180
@@ -70,6 +80,9 @@ async def main(page: ft.Page):
     page.window.min_height = 680
     page.theme_mode = initial_theme_mode
     page.padding = 16
+    page.fonts = {
+        "JetBrains Mono": (BASE_DIR / "assets" / "fonts" / "english" / "JetBrainsMono-VariableFont_wght.ttf").as_posix(),
+    }
 
     def is_light_theme():
         """Resolve System mode against the OS brightness for code palettes."""
@@ -84,6 +97,9 @@ async def main(page: ft.Page):
     is_watching = [False]
     watch_task = [None]
     last_converted_pdf = [None]
+    active_view = ["editor"]
+    sidebar_expanded = [True]
+    preferences_expanded = [True]
 
     # Pre-populate detected input files
     initial_files = (
@@ -108,6 +124,35 @@ async def main(page: ft.Page):
     # Output directory and custom filename
     output_dir_val = [str(OUTPUT_DIR)]
 
+    # Conversion-log utility controls. The log itself is shared by the Editor
+    # and Documents views, but each view keeps its own top-right copy/fold
+    # cluster so the controls always sit beside the window expand button.
+    log_toggle_buttons = []
+    log_copy_buttons = []
+
+    async def handle_log_copy(_e):
+        # Flet must receive an async handler directly; wrapping an async
+        # callback in a lambda can leave its coroutine unawaited.
+        await copy_log(_e)
+
+    def make_log_toggle_button():
+        button = ft.IconButton(
+            icon=ft.Icons.EXPAND_MORE,
+            tooltip="Expand conversion log",
+            on_click=lambda _e: toggle_log(_e),
+        )
+        log_toggle_buttons.append(button)
+        return button
+
+    def make_log_copy_button():
+        button = ft.IconButton(
+            icon=ft.Icons.CONTENT_COPY,
+            tooltip="Copy log",
+            on_click=handle_log_copy,
+        )
+        log_copy_buttons.append(button)
+        return button
+
     # ---------------- UI Controls ----------------
     # Header / AppBar
     def update_theme_button():
@@ -121,12 +166,16 @@ async def main(page: ft.Page):
             theme_btn.icon = ft.Icons.DARK_MODE_OUTLINED
             theme_btn.tooltip = "Theme: Dark (click for System)"
 
+    render_sidebar_fn = [None]
+
     def toggle_theme(e):
         theme_cycle = (ft.ThemeMode.SYSTEM, ft.ThemeMode.LIGHT, ft.ThemeMode.DARK)
         current_index = theme_cycle.index(page.theme_mode)
         page.theme_mode = theme_cycle[(current_index + 1) % len(theme_cycle)]
         update_theme_button()
         apply_log_theme()
+        if render_sidebar_fn[0]:
+            render_sidebar_fn[0]()
         refresh_preview()
         save_last_used_settings(
             collect_current_settings(),
@@ -137,6 +186,8 @@ async def main(page: ft.Page):
     def handle_platform_brightness_change(_e):
         if page.theme_mode == ft.ThemeMode.SYSTEM:
             apply_log_theme()
+            if render_sidebar_fn[0]:
+                render_sidebar_fn[0]()
             refresh_preview()
             page.update()
 
@@ -147,33 +198,28 @@ async def main(page: ft.Page):
     )
     update_theme_button()
 
+    def toggle_window_maximize(_e=None):
+        """Toggle the window between maximized and its previous size."""
+        page.window.maximized = not page.window.maximized
+        fullscreen_btn.icon = (
+            ft.Icons.FULLSCREEN_EXIT if page.window.maximized else ft.Icons.FULLSCREEN
+        )
+        fullscreen_btn.tooltip = (
+            "Restore window size" if page.window.maximized else "Maximize the window"
+        )
+        page.update()
+
+    fullscreen_btn = ft.IconButton(
+        icon=ft.Icons.FULLSCREEN,
+        tooltip="Maximize the window",
+        on_click=toggle_window_maximize,
+    )
+
     open_output_btn = ft.IconButton(
         icon=ft.Icons.FOLDER_OPEN_OUTLINED,
         tooltip="Open Output Folder",
         on_click=lambda e: open_in_system(output_dir_val[0]),
     )
-
-    def open_help_tab(_e=None):
-        """Jump to the built-in Help tab (falls back to the user guide file)."""
-        try:
-            tabs.selected_index = 6
-            page.update()
-        except NameError:
-            open_in_system(BASE_DIR / "docs" / "USER_GUIDE.md")
-
-    help_btn = ft.IconButton(
-        icon=ft.Icons.HELP_OUTLINE,
-        tooltip="Open the in-app Help tab",
-        on_click=open_help_tab,
-    )
-
-    app_bar = ft.AppBar(
-        leading=ft.Icon(ft.Icons.PICTURE_AS_PDF_ROUNDED, color=ft.Colors.AMBER_400),
-        title=ft.Text("PDF Creator Studio", weight=ft.FontWeight.BOLD),
-        center_title=False,
-        actions=[open_output_btn, theme_btn, help_btn, ft.Container(width=8)],
-    )
-    page.appbar = app_bar
 
     # Files tab controls
     selected_files_text = ft.Text(
@@ -259,6 +305,13 @@ async def main(page: ft.Page):
     files_tab = ft.Container(
         content=ft.Column(
             [
+                ft.Row(
+                    [
+                        ft.Text("Documents", weight=ft.FontWeight.BOLD, size=16),
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=8,
+                ),
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column(
@@ -366,6 +419,7 @@ async def main(page: ft.Page):
         "Arabic": get_font_families(project_fonts=PROJECT_FONT_CHOICES["Arabic"]),
         "English": get_font_families(project_fonts=PROJECT_FONT_CHOICES["English"]),
         "Headings": get_font_families(project_fonts=HEADING_FONT_CHOICES),
+        "Coding": get_font_families(project_fonts=CODING_FONT_CHOICES),
     }
     bengali_font_dd = ft.Dropdown(
         label="Bengali Font (বাংলা)",
@@ -391,12 +445,19 @@ async def main(page: ft.Page):
         options=[ft.dropdown.Option(f) for f in font_families["Headings"]],
         expand=True,
     )
+    code_font_dd = ft.Dropdown(
+        label="Coding / Monospace Font",
+        value="JetBrains Mono",
+        options=[ft.dropdown.Option(f) for f in font_families["Coding"]],
+        expand=True,
+    )
 
     font_dropdowns = {
         "Bengali": bengali_font_dd,
         "Arabic": arabic_font_dd,
         "English": english_font_dd,
         "Headings": heading_font_dd,
+        "Coding": code_font_dd,
     }
 
     font_dropdown_roles = {id(dropdown): role for role, dropdown in font_dropdowns.items()}
@@ -506,9 +567,10 @@ async def main(page: ft.Page):
                     content=ft.Container(
                         content=ft.Column(
                             [
-                                ft.Text("Multilingual Fonts", weight=ft.FontWeight.BOLD, size=16),
+                                ft.Text("Multilingual & Coding Fonts", weight=ft.FontWeight.BOLD, size=16),
                                 ft.Row([bengali_font_dd, arabic_font_dd], spacing=16),
                                 ft.Row([english_font_dd, heading_font_dd], spacing=16),
+                                ft.Row([code_font_dd], spacing=16),
                             ],
                             spacing=14,
                         ),
@@ -654,6 +716,7 @@ async def main(page: ft.Page):
             "heading_font": heading_font_dd.value,
             "bengali_font": bengali_font_dd.value,
             "arabic_font": arabic_font_dd.value,
+            "code_font": code_font_dd.value,
             "page_numbers": page_numbers_switch.value,
             "page_number_style": "arabic",
             "page_number_format": page_number_format_dd.value,
@@ -682,10 +745,7 @@ async def main(page: ft.Page):
         if not settings or not isinstance(settings, dict):
             return
         if "theme_mode" in settings:
-            try:
-                page.theme_mode = ft.ThemeMode(settings["theme_mode"])
-            except ValueError:
-                page.theme_mode = ft.ThemeMode.SYSTEM
+            page.theme_mode = resolve_theme_mode(settings["theme_mode"])
             update_theme_button()
             refresh_preview()
         if "page_size_choice" in settings and settings["page_size_choice"] in PAGE_SIZES:
@@ -1261,26 +1321,6 @@ async def main(page: ft.Page):
             append_log("[EDITOR] The editor is already empty.")
             page.update()
 
-    # ---------------- Expand / restore window ----------------
-    def toggle_window_maximize(_e=None):
-        """Toggle the window between maximized and its previous size."""
-        page.window.maximized = not page.window.maximized
-        expand_editor_btn.icon = (
-            ft.Icons.FULLSCREEN_EXIT if page.window.maximized else ft.Icons.FULLSCREEN
-        )
-        expand_editor_btn.tooltip = (
-            "Restore window size" if page.window.maximized else "Maximize the window"
-        )
-        page.update()
-
-    expand_editor_btn = ft.IconButton(
-        icon=ft.Icons.FULLSCREEN,
-        icon_size=20,
-        width=32,
-        height=32,
-        tooltip="Maximize the window",
-        on_click=toggle_window_maximize,
-    )
 
     editor_toolbar = ft.Row(
         [
@@ -1344,7 +1384,6 @@ async def main(page: ft.Page):
                         ft.Container(content=editor_status, expand=True),
                         editor_mode_dd,
                         preview_toggle_btn,
-                        expand_editor_btn,
                         editor_convert_btn,
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -1361,10 +1400,28 @@ async def main(page: ft.Page):
 
     # ---------------- Bottom Status, Console & Actions ----------------
     log_messages = []
-    log_column = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, spacing=4, auto_scroll=True)
+    log_text = ft.Text(
+        spans=[],
+        size=12,
+        font_family="monospace",
+        selectable=True,
+        expand=True,
+    )
+    log_column = ft.Column(
+        [log_text], expand=True, scroll=ft.ScrollMode.AUTO, spacing=4, auto_scroll=True
+    )
 
     async def copy_log(_e):
-        await clipboard.set("\n".join(log_messages))
+        if not log_messages:
+            return
+        try:
+            await clipboard.set("\n".join(log_messages))
+            for button in log_copy_buttons:
+                button.icon = ft.Icons.CHECK
+                button.tooltip = "Log copied"
+            page.update()
+        except Exception as error:
+            append_log(f"[ERROR] Could not copy the conversion log: {error}")
 
     log_expanded = [False]
 
@@ -1372,34 +1429,26 @@ async def main(page: ft.Page):
         log_expanded[0] = expanded
         log_column.visible = expanded
         log_container.height = 160 if expanded else 48
-        log_container.padding = 10 if expanded else 4
-        log_toggle_btn.icon = ft.Icons.EXPAND_LESS if expanded else ft.Icons.EXPAND_MORE
-        log_toggle_btn.tooltip = "Collapse conversion log" if expanded else "Expand conversion log"
+        log_container.padding = 10 if expanded else ft.Padding(left=10, top=4, right=10, bottom=4)
+        for button in log_toggle_buttons:
+            button.icon = ft.Icons.KEYBOARD_ARROW_DOWN if expanded else ft.Icons.KEYBOARD_ARROW_UP
+            button.tooltip = (
+                "Collapse conversion log" if expanded else "Expand conversion log"
+            )
 
     def toggle_log(_e=None):
         set_log_expanded(not log_expanded[0])
         page.update()
 
-    log_toggle_btn = ft.IconButton(
-        icon=ft.Icons.EXPAND_MORE,
-        tooltip="Expand conversion log",
-        on_click=toggle_log,
-    )
-
     log_header = ft.Row(
         [
             ft.Text("Conversion Log", weight=ft.FontWeight.BOLD),
-            ft.IconButton(
-                icon=ft.Icons.CONTENT_COPY,
-                tooltip="Copy log",
-                on_click=copy_log,
-            ),
-            log_toggle_btn,
+            ft.Container(expand=True),
+            make_log_copy_button(),
+            make_log_toggle_button(),
         ],
-        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
-    log_copy_button = log_header.controls[1]
     log_container = ft.Container(
         content=ft.Column([log_header, log_column], expand=True, spacing=4),
         height=160,
@@ -1427,9 +1476,11 @@ async def main(page: ft.Page):
         )
         log_container.bgcolor = "#F1F3F5" if light_mode else ft.Colors.BLACK
         log_header.controls[0].color = "#202124" if light_mode else ft.Colors.WHITE
-        log_copy_button.icon_color = "#202124" if light_mode else ft.Colors.WHITE
-        for control in log_column.controls:
-            control.color = log_entry_color(control.value)
+        for button in log_copy_buttons:
+            button.icon_color = "#444746" if light_mode else "#C4C7C5"
+        for button in log_toggle_buttons:
+            button.icon_color = "#444746" if light_mode else "#C4C7C5"
+        refresh_log_text()
 
     page.on_platform_brightness_change = handle_platform_brightness_change
 
@@ -1437,10 +1488,24 @@ async def main(page: ft.Page):
         timestamp = time.strftime("%H:%M:%S")
         formatted_message = f"[{timestamp}] {message}"
         log_messages.append(formatted_message)
-        log_column.controls.append(
-            ft.Text(formatted_message, size=12, font_family="monospace", color=log_entry_color(message), selectable=True)
-        )
+        for button in log_copy_buttons:
+            button.icon = ft.Icons.CONTENT_COPY
+            button.tooltip = "Copy log"
+        refresh_log_text()
         page.update()
+
+    def refresh_log_text():
+        """Render the log as one selectable text flow with per-line colors."""
+        log_text.spans = [
+            ft.TextSpan(
+                text=f"[{time_text}] {message}\n",
+                style=ft.TextStyle(color=log_entry_color(message)),
+            )
+            for time_text, message in (
+                (line[1:9], line[11:]) if len(line) >= 11 else ("", line)
+                for line in log_messages
+            )
+        ]
 
     status_badge = ft.Text("Status: Ready", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
     progress_bar = ft.ProgressBar(visible=False, color=ft.Colors.AMBER_400)
@@ -1541,8 +1606,7 @@ async def main(page: ft.Page):
     async def toggle_watch_mode():
         if is_watching[0]:
             is_watching[0] = False
-            action_btn.text = "🚀 Start Conversion"
-            action_btn.icon = ft.Icons.ROCKET_LAUNCH
+            update_primary_action()
             status_badge.value = "Status: Watch Mode Stopped"
             status_badge.color = ft.Colors.GREY_400
             append_log("[WATCH] Auto-convert stopped.")
@@ -1555,8 +1619,7 @@ async def main(page: ft.Page):
 
         target_file = selected_files[0]
         is_watching[0] = True
-        action_btn.text = "⏹ Stop Auto-Convert"
-        action_btn.icon = ft.Icons.STOP
+        update_primary_action()
         status_badge.value = f"Status: Watching '{Path(target_file).name}'"
         status_badge.color = ft.Colors.CYAN_400
         append_log(f"[WATCH] Auto-convert started on '{Path(target_file).name}'. Monitoring changes...")
@@ -1583,21 +1646,71 @@ async def main(page: ft.Page):
         watch_task[0] = asyncio.create_task(watch_loop())
 
     async def handle_action_click(e):
+        if is_watching[0]:
+            await toggle_watch_mode()
+            return
+        if active_view[0] == "editor":
+            await execute_editor_conversion()
+            return
         mode = list(mode_segmented.selected)[0] if mode_segmented.selected else "once"
         if mode == "auto":
             await toggle_watch_mode()
         else:
             await execute_conversion()
 
+    def update_primary_action():
+        """Keep the AppBar action aligned with the active view and watch state."""
+        if active_view[0] == "editor":
+            action_btn.visible = False
+            action_btn.text = "Export PDF"
+            action_btn.icon = ft.Icons.ROCKET_LAUNCH
+            action_btn.tooltip = "Export the editor buffer to PDF"
+        else:
+            action_btn.visible = True
+            if is_watching[0]:
+                action_btn.text = "⏹ Stop Auto-Convert"
+                action_btn.icon = ft.Icons.STOP
+                action_btn.tooltip = "Stop the auto-convert watcher"
+            else:
+                action_btn.text = "Convert to PDF"
+                action_btn.icon = ft.Icons.ROCKET_LAUNCH
+                action_btn.tooltip = "Convert the selected documents to PDF"
+
     action_btn = ft.FilledButton(
-        "🚀 Convert to PDF",
+        "Convert to PDF",
         icon=ft.Icons.ROCKET_LAUNCH,
         on_click=handle_action_click,
-        style=ft.ButtonStyle(padding=18),
+        style=ft.ButtonStyle(padding=14),
     )
+    update_primary_action()
 
     # ---------------- Help Tab ----------------
     help_selected_topic = [None]
+    help_topics_width = [260.0]
+    help_topics_open = [True]
+    HELP_TOPICS_MIN_WIDTH = 180
+    HELP_TOPICS_MAX_WIDTH = 380
+    def clear_help_search(_e=None):
+        help_search_field.value = ""
+        help_clear_btn.visible = False
+        help_search_results.visible = False
+        render_help_list(HELP_TOPICS)
+        help_results_count.value = f"{len(HELP_TOPICS)} topics found"
+        page.update()
+
+    help_clear_btn = ft.TextButton(
+        "Clear",
+        icon=ft.Icons.CLEAR_ROUNDED,
+        tooltip="Clear search",
+        on_click=clear_help_search,
+        visible=False,
+    )
+
+    def handle_search_focus(_e=None):
+        if (help_search_field.value or "").strip():
+            help_search_results.visible = True
+            page.update()
+
     help_search_field = ft.TextField(
         label="Search help topics",
         hint_text="Type to filter topics, e.g. 'preview', 'fonts', 'toc'",
@@ -1606,13 +1719,18 @@ async def main(page: ft.Page):
         expand=True,
         # Deferred so the handler can be defined after the control.
         on_change=lambda e: handle_help_search(e),
+        on_focus=lambda e: handle_search_focus(e),
     )
     help_results_count = ft.Text("", size=12, color=ft.Colors.GREY_400)
+    # Search results live under the search box so they stay reachable even
+    # when the Topics pane is collapsed.
+    help_search_results = ft.Column(spacing=2, visible=False, data="help-search-results")
     help_topic_list = ft.Column(spacing=2, expand=True, scroll=ft.ScrollMode.AUTO)
     help_topic_content = ft.Column(spacing=8, expand=True, scroll=ft.ScrollMode.AUTO)
 
-    def render_help_list(matches):
-        help_topic_list.controls = [help_topic_card(topic) for topic in matches]
+    def render_help_list(matches, target=None):
+        target = target or help_topic_list
+        target.controls = [help_topic_card(topic) for topic in matches]
 
     def render_help_topic(topic):
         help_selected_topic[0] = topic["title"] if topic else None
@@ -1629,29 +1747,47 @@ async def main(page: ft.Page):
         )
 
     def handle_help_search(_e=None):
-        matches = search_help_topics(help_search_field.value)
+        query = (help_search_field.value or "").strip()
+        help_clear_btn.visible = bool(query)
+        help_search_results.visible = bool(query)
+        matches = search_help_topics(help_search_field.value) if query else HELP_TOPICS
         help_results_count.value = (
             f"{len(matches)} topic{'s' if len(matches) != 1 else ''} found"
         )
+        render_help_list(matches, help_search_results)
         render_help_list(matches)
-        if help_selected_topic[0] not in {topic["title"] for topic in matches}:
-            render_help_topic(matches[0] if matches else None)
-        else:
-            render_help_topic(
-                next(
-                    (topic for topic in matches if topic["title"] == help_selected_topic[0]),
-                    None,
+        if query:
+            if help_selected_topic[0] not in {topic["title"] for topic in matches}:
+                render_help_topic(matches[0] if matches else None)
+            else:
+                render_help_topic(
+                    next(
+                        (topic for topic in matches if topic["title"] == help_selected_topic[0]),
+                        None,
+                    )
                 )
-            )
         page.update()
 
     def help_topic_card(topic):
-        selected = topic["title"] == help_selected_topic[0]
+        selected = (
+            help_topics_open[0]
+            and topic["title"] == help_selected_topic[0]
+        )
+        is_light = is_light_theme()
+        if selected:
+            card_bgcolor = "#E8F0FE" if is_light else "#1E3A5F"
+            card_border = ft.Border.all(1, "#1967D2" if is_light else "#8AB4F8")
+            title_color = "#1967D2" if is_light else "#8AB4F8"
+        else:
+            card_bgcolor = None
+            card_border = None
+            title_color = None
+
         return ft.Card(
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text(topic["title"], weight=ft.FontWeight.W_600, size=13),
+                        ft.Text(topic["title"], weight=ft.FontWeight.W_600, size=13, color=title_color),
                         ft.Text(
                             topic["summary"],
                             size=12,
@@ -1665,15 +1801,102 @@ async def main(page: ft.Page):
                 data=topic["title"],
                 on_click=lambda _e, t=topic: _select_help_topic(t),
                 ink=True,
-                bgcolor=ft.Colors.BLUE_900 if selected else None,
+                bgcolor=card_bgcolor,
+                border=card_border,
+                border_radius=8,
             ),
             margin=ft.Margin(bottom=4, left=0, right=0, top=0),
         )
 
     def _select_help_topic(topic):
         render_help_topic(topic)
-        render_help_list(search_help_topics(help_search_field.value))
+        help_search_results.visible = False
+        query = (help_search_field.value or "").strip()
+        help_clear_btn.visible = bool(query)
+        matches = search_help_topics(help_search_field.value) if query else HELP_TOPICS
+        render_help_list(matches)
         page.update()
+
+    # --- Help navigation buttons (defined first so float_row can reference float_btn) ---
+    help_topics_toggle_btn = ft.IconButton(
+        icon=ft.Icons.MENU_ROUNDED,
+        icon_size=20,
+        width=32,
+        height=32,
+        tooltip="Collapse the Topics pane",
+        # on_click wired after toggle_help_topics is defined below.
+    )
+    help_topics_float_btn = ft.IconButton(
+        icon=ft.Icons.MENU_ROUNDED,
+        icon_size=20,
+        width=32,
+        height=32,
+        tooltip="Show the Topics pane",
+        # on_click wired after toggle_help_topics is defined below.
+    )
+    # Float row: shown above content when the Topics pane is hidden.
+    help_topics_float_row = ft.Row(
+        [help_topics_float_btn],
+        visible=False,
+        data="help-float-row",
+    )
+
+    def toggle_help_topics(_e=None):
+        help_topics_open[0] = not help_topics_open[0]
+        help_topics_pane.visible = help_topics_open[0]
+        help_topics_divider.visible = help_topics_open[0]
+        help_topics_toggle_btn.tooltip = (
+            "Collapse the Topics pane" if help_topics_open[0] else "Show the Topics pane"
+        )
+        # Show the floating hamburger row above content when pane is collapsed.
+        help_topics_float_row.visible = not help_topics_open[0]
+        matches = search_help_topics(help_search_field.value)
+        render_help_list(matches)
+        page.update()
+
+    # Wire on_click now that toggle_help_topics exists.
+    help_topics_toggle_btn.on_click = toggle_help_topics
+    help_topics_float_btn.on_click = toggle_help_topics
+
+    def resize_help_split(e):
+        delta = e.primary_delta or 0
+        help_topics_width[0] = max(
+            HELP_TOPICS_MIN_WIDTH,
+            min(HELP_TOPICS_MAX_WIDTH, help_topics_width[0] + delta),
+        )
+        help_topics_pane.width = help_topics_width[0]
+        page.update()
+
+    help_topics_pane = ft.Container(
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Text("Topics", weight=ft.FontWeight.W_600, size=13),
+                        ft.Container(expand=True),
+                        help_topics_toggle_btn,
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.Divider(height=4),
+                help_topic_list,
+            ],
+            spacing=4,
+            expand=True,
+        ),
+        width=help_topics_width[0],
+        data="help-topics-pane",
+    )
+    help_topics_divider = ft.GestureDetector(
+        content=ft.Container(
+            content=ft.VerticalDivider(width=14, thickness=1, color=ft.Colors.OUTLINE_VARIANT),
+            width=14,
+        ),
+        drag_interval=1,
+        on_horizontal_drag_update=resize_help_split,
+        mouse_cursor=ft.MouseCursor.RESIZE_LEFT_RIGHT,
+        data="help-topics-divider",
+    )
 
     render_help_list(HELP_TOPICS)
     render_help_topic(HELP_TOPICS[0])
@@ -1689,10 +1912,11 @@ async def main(page: ft.Page):
                             [
                                 ft.Text("Help", weight=ft.FontWeight.BOLD, size=16),
                                 ft.Row(
-                                    [help_search_field, help_results_count],
+                                    [help_search_field, help_clear_btn, help_results_count],
                                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                                    spacing=12,
+                                    spacing=8,
                                 ),
+                                help_search_results,
                             ],
                             spacing=10,
                         ),
@@ -1701,28 +1925,25 @@ async def main(page: ft.Page):
                 ),
                 ft.Row(
                     [
+                        help_topics_pane,
+                        help_topics_divider,
                         ft.Container(
                             content=ft.Column(
                                 [
-                                    ft.Text(
-                                        "Topics",
-                                        weight=ft.FontWeight.W_600,
-                                        size=13,
+                                    # Shown only when the topics pane is hidden;
+                                    # sits above the content, not over it.
+                                    help_topics_float_row,
+                                    ft.Container(
+                                        content=help_topic_content,
+                                        expand=True,
+                                        padding=ft.Padding(left=12, top=0, right=0, bottom=0),
                                     ),
-                                    ft.Divider(height=4),
-                                    help_topic_list,
                                 ],
                                 spacing=4,
                                 expand=True,
                             ),
-                            width=260,
                             expand=True,
-                        ),
-                        ft.VerticalDivider(width=1, thickness=1),
-                        ft.Container(
-                            content=help_topic_content,
-                            expand=True,
-                            padding=ft.Padding(left=12, top=0, right=0, bottom=0),
+                            data="help-details",
                         ),
                     ],
                     expand=True,
@@ -1736,63 +1957,191 @@ async def main(page: ft.Page):
         padding=10,
     )
 
-    # ---------------- Assemble Tabs ----------------
-    tab_bar = ft.TabBar(
-        tabs=[
-            ft.Tab(label="Editor", icon=ft.Icons.EDIT_OUTLINED),
-            ft.Tab(label="Documents", icon=ft.Icons.DESCRIPTION_OUTLINED),
-            ft.Tab(label="Page & Geometry", icon=ft.Icons.ASPECT_RATIO),
-            ft.Tab(label="Typography", icon=ft.Icons.FONT_DOWNLOAD_OUTLINED),
-            ft.Tab(label="TOC & Numbers", icon=ft.Icons.FORMAT_LIST_NUMBERED),
-            ft.Tab(label="Profiles", icon=ft.Icons.BOOKMARKS_OUTLINED),
-            ft.Tab(label="Help", icon=ft.Icons.HELP_OUTLINE),
-        ]
+    # ---------------- Assemble Sidebar & Views ----------------
+    view_controls = {
+        "editor": editor_tab,
+        "documents": files_tab,
+        "geometry": geometry_tab,
+        "typography": typography_tab,
+        "toc": toc_tab,
+        "profiles": profiles_tab,
+        "help": help_tab,
+    }
+    view_holder = ft.Container(expand=True, content=editor_tab, data="view-holder")
+
+    SIDEBAR_EXPANDED_WIDTH = 216
+    SIDEBAR_COLLAPSED_WIDTH = 64
+    preference_view_keys = {"geometry", "typography", "toc", "profiles"}
+
+    nav_items = [
+        ("editor", "Editor", ft.Icons.EDIT_OUTLINED, False),
+        ("documents", "Documents", ft.Icons.DESCRIPTION_OUTLINED, False),
+        ("preferences", "Preferences", ft.Icons.TUNE, False),
+        ("geometry", "Page and Geometry", ft.Icons.ASPECT_RATIO, True),
+        ("typography", "Typography", ft.Icons.FONT_DOWNLOAD_OUTLINED, True),
+        ("toc", "TOC & Page Numbers", ft.Icons.FORMAT_LIST_NUMBERED, True),
+        ("profiles", "Profiles", ft.Icons.BOOKMARKS_OUTLINED, True),
+        ("help", "Help", ft.Icons.HELP_OUTLINE, False),
+    ]
+
+    sidebar_column = ft.Column(spacing=4, expand=True, scroll=ft.ScrollMode.AUTO)
+    sidebar_container = ft.Container(
+        content=sidebar_column,
+        width=SIDEBAR_EXPANDED_WIDTH,
+        padding=ft.Padding(left=4, top=4, right=4, bottom=4),
     )
 
-    tab_views = ft.TabBarView(
-        expand=True,
-        controls=[
-            editor_tab,
-            files_tab,
-            geometry_tab,
-            typography_tab,
-            toc_tab,
-            profiles_tab,
-            help_tab,
-        ],
-    )
+    def _nav_item_selected(key):
+        if key == "preferences":
+            return active_view[0] in preference_view_keys
+        return active_view[0] == key
 
-    def handle_tab_change(_e):
-        set_log_expanded(tabs.selected_index != 0)
+    def handle_nav_click(key):
+        if key == "preferences":
+            if not sidebar_expanded[0]:
+                sidebar_expanded[0] = True
+                preferences_expanded[0] = True
+            elif not preferences_expanded[0]:
+                preferences_expanded[0] = True
+                if active_view[0] not in preference_view_keys:
+                    show_view("geometry")
+                    return
+            elif active_view[0] in preference_view_keys:
+                preferences_expanded[0] = False
+            else:
+                show_view("geometry")
+                return
+        else:
+            show_view(key)
+            return
+        render_sidebar()
         page.update()
 
-    tabs = ft.Tabs(
-        length=7,
-        selected_index=0,
-        on_change=handle_tab_change,
-        expand=True,
-        content=ft.Column(
-            expand=True,
-            controls=[
-                tab_bar,
-                tab_views,
-            ],
-        ),
-    )
+    def render_sidebar():
+        """Rebuild the shrinkable sidebar for the current expansion state."""
+        expanded = sidebar_expanded[0]
+        sidebar_container.width = (
+            SIDEBAR_EXPANDED_WIDTH if expanded else SIDEBAR_COLLAPSED_WIDTH
+        )
+        is_light = is_light_theme()
+        controls = [
+            ft.Row(
+                [
+                    ft.IconButton(
+                        icon=ft.Icons.MENU_ROUNDED,
+                        icon_size=22,
+                        width=38,
+                        height=38,
+                        tooltip="Collapse sidebar" if expanded else "Expand sidebar",
+                        on_click=lambda _e: toggle_sidebar(),
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.START if expanded else ft.MainAxisAlignment.CENTER,
+            )
+        ]
+        for key, label, icon, is_child in nav_items:
+            if is_child and (not expanded or not preferences_expanded[0]):
+                continue
+            if is_child and key not in preference_view_keys:
+                continue
+            selected = _nav_item_selected(key)
+            if selected:
+                item_bgcolor = "#E8F0FE" if is_light else "#1E3A5F"
+                item_color = "#1967D2" if is_light else "#8AB4F8"
+                item_weight = ft.FontWeight.W_600
+            else:
+                item_bgcolor = None
+                item_color = "#444746" if is_light else "#C4C7C5"
+                item_weight = ft.FontWeight.W_500
 
+            if expanded:
+                row = ft.Row(
+                    [
+                        ft.Icon(icon, size=18, color=item_color),
+                        ft.Text(label, size=13, weight=item_weight, color=item_color),
+                    ],
+                    spacing=10,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+                if is_child:
+                    row = ft.Row([ft.Container(width=10), row], spacing=0)
+            else:
+                row = ft.Row(
+                    [ft.Icon(icon, size=18, color=item_color)],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+            controls.append(
+                ft.Container(
+                    content=row,
+                    padding=ft.Padding(left=10, top=8, right=10, bottom=8),
+                    border_radius=8,
+                    bgcolor=item_bgcolor,
+                    ink=True,
+                    tooltip=label,
+                    data=key,
+                    on_click=lambda _e, k=key: handle_nav_click(k),
+                )
+            )
+        sidebar_column.controls = controls
+
+    def toggle_sidebar(_e=None):
+        sidebar_expanded[0] = not sidebar_expanded[0]
+        render_sidebar()
+        page.update()
+
+    def show_view(key):
+        """Switch the single content pane and scope the conversion log."""
+        if key not in view_controls:
+            return
+        active_view[0] = key
+        view_holder.content = view_controls[key]
+        # The conversion log belongs only to Editor and Documents.
+        log_container.visible = key in {"editor", "documents"}
+        set_log_expanded(key != "editor")
+        update_primary_action()
+        render_sidebar()
+        page.update()
+
+    render_sidebar_fn[0] = render_sidebar
+    render_sidebar()
     set_log_expanded(False)
+
+    # AppBar conversion controls. Handlers are attached after every action
+    # control exists, so the bar itself is assembled at the end of main().
+    app_bar = ft.AppBar(
+        leading=ft.Icon(ft.Icons.PICTURE_AS_PDF_ROUNDED, color=ft.Colors.AMBER_400),
+        title=ft.Text("PDF Creator Studio", weight=ft.FontWeight.BOLD),
+        center_title=False,
+        actions=[
+            action_btn,
+            open_pdf_btn,
+            open_output_btn,
+            mode_segmented,
+            ft.Container(width=16),
+            fullscreen_btn,
+            theme_btn,
+        ],
+    )
+    page.appbar = app_bar
 
     # Main view structure
     page.add(
-        tabs,
-        ft.Divider(),
+        ft.Row(
+            [
+                sidebar_container,
+                ft.VerticalDivider(width=1, thickness=1),
+                view_holder,
+            ],
+            expand=True,
+            spacing=0,
+            vertical_alignment=ft.CrossAxisAlignment.STRETCH,
+        ),
+        ft.Divider(height=4),
         ft.Row(
             [
                 status_badge,
                 ft.Container(expand=True),
-                mode_segmented,
-                open_pdf_btn,
-                action_btn,
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,

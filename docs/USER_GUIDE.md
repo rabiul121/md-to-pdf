@@ -10,7 +10,7 @@ For a source checkout, run `scripts/windows/setup.bat` once, then launch with `r
 
 ## Documents
 
-1. Select **Choose File** for one source document, or **Batch Select** to convert multiple files.
+1. Open **Documents** in the left sidebar, then select **Choose File** for one source document, or **Batch Select** to convert multiple files.
 2. Files in the project's `input` folder appear as quick-select chips.
 3. **Output Folder** chooses where PDFs are written. **Custom Output Name** changes the output name for a single-file conversion; leave it blank to use the input filename.
 4. Existing PDFs are kept. If a name already exists, the app adds a suffix such as `_1` rather than overwriting it.
@@ -19,7 +19,7 @@ Supported input extensions are `.md`, `.markdown`, `.txt`, `.doc`, `.docx`, `.ep
 
 ## Editor
 
-The **Editor** tab (the first tab) lets you write or paste Markdown or plain text and convert it to PDF directly, without creating a file first.
+The **Editor** view (the first sidebar item) lets you write or paste Markdown or plain text and convert it to PDF directly, without creating a file first.
 
 1. Paste or type your content into the editor.
 2. Use the toolbar to apply Markdown formatting: bold, italic, strikethrough, headings 1-3, bulleted and numbered lists, block quotes, inline code, code blocks, links, and horizontal rules. Select text first, or place the cursor and click a button to insert a ready-to-type placeholder.
@@ -28,14 +28,14 @@ The **Editor** tab (the first tab) lets you write or paste Markdown or plain tex
 5. **Save** writes the document to its current file. **Save As...** saves the buffer to a new location. The status line next to the save buttons shows the current file and warns about unsaved changes.
 6. **Clear / Close** empties the editor and closes the current file. If there are unsaved changes, the app asks for confirmation first.
 7. The **eye icon** opens a live preview pane beside the editor. It refreshes as you type or apply formatting. Drag the vertical handle to resize the panes; both keep at least 30% of the available width. Press the eye icon again (or the X in the preview) to close it. Markdown preview supports fenced and indented code, task lists, nested lists, tables, quotes, and reference links. Code blocks use syntax highlighting that follows the light/dark app theme. Footnote references (`[^note]` with a `[^note]: ...` definition) appear as numbered references with a Footnotes section at the bottom. Plain Text mode previews the text literally.
-8. The expand icon next to **Format** toggles the window between a normal and a maximized size, giving the editor more room.
-9. **Export PDF** converts the buffer using all settings from the other tabs. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
+8. The expand icon in the editor's top-right cluster toggles the window between a normal and a maximized size, giving the editor more room.
+9. **Export PDF** converts the buffer using all settings from the other views. It appears both in the editor row and as the primary action in the title bar while the Editor is active. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
 
-The editor uses a compact icon-based file row and a single-line formatting toolbar (scroll horizontally if needed). Hover over an icon to see its action. The conversion log starts collapsed in the Editor tab to leave more room for writing; use its chevron to expand it. Other tabs expand the log automatically. The preview is not a PDF page-layout preview; exported pagination and typography still follow the conversion settings.
+The editor uses a compact icon-based file row and a single-line formatting toolbar (scroll horizontally if needed). Hover over an icon to see its action. The conversion log is available only in the Editor and Documents views; it starts collapsed in the Editor to leave more room for writing. Use the copy and chevron buttons in the top-right of the editor row to copy or expand it. The preview is not a PDF page-layout preview; exported pagination and typography still follow the conversion settings.
 
 ## Help
 
-The **Help** tab (and the ? button in the title bar) opens the built-in help. Type in the **Search** box to filter the topic list by title, summary, or body text, then click a topic to read it. Topics are rendered with the same Markdown engine as the editor preview. The full manual also stays available in `docs/USER_GUIDE.md`.
+The **Help** view in the sidebar opens the built-in help. Type in the **Search** box to filter topics by title, summary, or body text; results appear directly under the search box and stay available even when the Topics pane is collapsed. Click a result or topic to read it in the details pane. Drag the divider between Topics and details to resize the split, or use the panel button to collapse and restore the Topics pane. Topics are rendered with the same Markdown engine as the editor preview. The full manual also stays available in `docs/USER_GUIDE.md`.
 
 ## Page and geometry
 
@@ -66,19 +66,22 @@ Bundled font files are in `assets/fonts`. Some selectable commercial or operatin
 
 ## Profiles
 
+- The built-in profiles are **Mobile**, **PC**, **English**, and **Bangla**. Profiles saved under other custom names are kept.
 - Choose a profile and press **Apply Profile** to load its settings.
 - **Update Selected** saves the current controls over the selected built-in or custom profile. Built-in profiles can be updated, but cannot be deleted.
 - **Save as New** stores current settings under a new custom name.
 - **Delete** removes the selected custom profile only.
-- The app remembers the selected profile, most recent settings, and theme between runs. Use the theme button to cycle **System**, **Light**, and **Dark**. System follows Windows appearance and responds when the system theme changes.
+- The app remembers the selected profile, most recent settings, and theme between runs. Use the theme button on the far right of the title bar to cycle **System**, **Light**, and **Dark**. System is the default when no theme has been saved; System follows Windows appearance and responds when the system theme changes.
 
 ## Convert and watch
 
-1. Choose **Convert Once** to convert the selected document(s) now.
-2. Choose **Auto-Convert (Watch)** for one selected file. The app watches for saves and converts again when that file changes.
-3. **Open Generated PDF** becomes available after a successful conversion. The folder button in the title bar opens the output directory.
+The conversion controls live in the title bar: the primary action (**Export PDF** in the Editor, **Convert to PDF** elsewhere), **Open Generated PDF**, **Open Output Folder**, and the **Convert Once** / **Auto-Convert (Watch)** switch.
 
-The conversion log shows progress and errors. Use its copy button to copy the full log; individual entries can also be selected.
+1. Choose **Convert Once** to convert the selected document(s) now.
+2. Choose **Auto-Convert (Watch)** for one selected file, then press the primary action. The app watches for saves and converts again when that file changes.
+3. **Open Generated PDF** becomes available after a successful conversion.
+
+The conversion log shows progress and errors in the Editor and Documents views. Use the copy button in the view's top-right cluster to copy the full log; individual entries can also be selected.
 
 Syntax-highlighted code blocks are exported with Pandoc's matching highlight style: `tango` for the light theme and `breezedark` for the dark theme.
 

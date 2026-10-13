@@ -29,6 +29,13 @@ $if(fontenglishfile)$
 $else$
 \setmainfont[AutoFakeBold=2,AutoFakeSlant=0.2]{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
 $endif$
+$if(fontmonofile)$
+\setmonofont[Path=$fontmonopath$,$if(fontmonofeatures)$$fontmonofeatures$$else$AutoFakeBold=2,AutoFakeSlant=0.2$endif$]{$fontmonofile$}
+$else$
+  $if(fontmono)$
+\setmonofont[AutoFakeBold=2,AutoFakeSlant=0.2]{$fontmono$}
+  $endif$
+$endif$
 $if(fontheadinglatinfile)$
   $if(boldheadings)$
 \newfontfamily\headinglatinfont[Path=$fontheadinglatinpath$,FakeBold=2]{$fontheadinglatinfile$}
@@ -160,10 +167,20 @@ $if(toclanguagebangla)$
 $else$
 \renewcommand{\contentsname}{Table of Contents}
 $endif$
-% Redefine horizontal rule
+% Redefine horizontal rule (used by pandoc for --- separators)
+% Default rule is thick and black; we make it a thin, muted grey line.
 \makeatletter
 \def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
-\renewcommand{\rule}[2]{\hrule height #2 width \linewidth}
+% Pandoc 3.x emits \horizontalrule for --- in markdown.
+\providecommand{\horizontalrule}{%
+  {\color{black!20}\hrule height 0.6pt}\vspace{2pt}%
+}
+% Refined footnote separator (subtle, soft rule instead of deep black line)
+\renewcommand{\footnoterule}{%
+  \kern -3pt
+  {\color{black!25}\hrule width 0.25\linewidth height 0.4pt}%
+  \kern 2.6pt
+}
 \makeatother
 
 \usepackage{fancyhdr}
@@ -301,16 +318,24 @@ $endif$
 \hfuzz=1pt
 \vfuzz=1pt
 
+% ---- Code block syntax highlighting ----
+% shadecolor is the background for the snugshade environment used by Shaded.
+\usepackage{color}
+\usepackage{fancyvrb}
 \usepackage{framed}
 $if(highlighting-macros)$
 $highlighting-macros$
 $else$
-\newenvironment{Shaded}{\begin{framed}}{\end{framed}}
+% Fallback when no syntax-highlighting style is selected.
+\providecommand{\VerbBar}{|}
+\providecommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
 $endif$
-
 \usepackage{fvextra}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
-\fvset{formatcom=\color{black}}
+% Override the Highlighting verbatim to support line-wrapping on narrow pages.
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakanywhere,commandchars=\\\{\}}
 
 \usepackage{bidi}
 $if(copyfriendlytext)$

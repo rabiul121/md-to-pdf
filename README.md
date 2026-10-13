@@ -10,7 +10,7 @@ An automated, cross-platform workflow to convert multilingual Markdown documents
   - **Bengali**: Powered by **SolaimanLipi** (with Bold support)
   - **Arabic**: Powered by **Amiri** with right-to-left paragraph direction and right alignment for Arabic-containing paragraphs.
   - **English & General**: Powered by bundled **DejaVu Sans** by default, with additional font choices in the UI.
-  - **Book typography**: Bundles OFL-licensed EB Garamond, Alegreya, Alegreya Sans, Crimson Text, Della Respira, Libre Baskerville, and Playfair Display; their license texts are in `assets/fonts/english`. Baskerville BT files are also present, but their license provenance is not recorded. Minion Pro files are present and require the applicable commercial license. Check each font's license before commercial distribution. The book-print profiles use A5 pages, first-line indentation, and page numbers.
+   - **Book typography**: Bundles OFL-licensed EB Garamond, Alegreya, Alegreya Sans, Crimson Text, Della Respira, Libre Baskerville, and Playfair Display; their license texts are in `assets/fonts/english`. Baskerville BT files are also present, but their license provenance is not recorded. Minion Pro files are present and require the applicable commercial license. Check each font's license before commercial distribution. Save a custom profile to reuse book-oriented A5, first-line-indent, and page-number settings.
   - **Icons, Emojis & Symbols**: Uses Windows' Segoe UI families or bundled Noto families on Linux.
 - **Responsive Layout & Margin Overflow Prevention**:
   - Automatically balances inter-word spacing (`\sloppy`, `\emergencystretch`) so text never cuts off or overflows the margins, even on narrow mobile dimensions.
@@ -36,19 +36,21 @@ An automated, cross-platform workflow to convert multilingual Markdown documents
 - **Font Size Presets**:
   - Standard (11pt), Medium (14pt), Large (17pt), or Custom (8pt - 36pt).
 - **Modern Graphical UI & Interactive CLI**:
-  - Native desktop UI window with file picker, preset selectors, batch selection, and live conversion log.
+   - Native desktop UI window with a collapsible sidebar, title-bar conversion controls, file picker, preset selectors, batch selection, and a view-scoped conversion log.
   - Interactive terminal CLI wizard for headless/SSH environments.
 - **Input Formats**: Markdown, text, Word `.doc`/`.docx`, EPUB, and MOBI. Pandoc reads Markdown, text, DOCX, and EPUB directly; legacy DOC needs LibreOffice, and MOBI needs Calibre's `ebook-convert` command.
 - **Output Controls**: Choose a custom PDF filename and destination folder, then open the output folder from the UI. Existing files are preserved; collisions use incrementing names such as `document_1.pdf` and `document_2.pdf`.
 - **Multilingual Layout**: Arabic-containing paragraphs are right-to-left and right-aligned. Bangla page labels render both current and total page digits in Bengali; TOC title alignment, design, and title size are configurable.
-- **Saved Profiles**: Quick presets include Mobile, PC, English, Bangla, Minimal, and Decorative. Select a profile to apply its values to the visible options; save named profiles in `profiles.json`. The GUI also restores the last-used customization on the next launch.
+- **Saved Profiles**: Quick presets include Mobile, PC, English, and Bangla. Select a profile to apply its values to the visible options; save named profiles in `profiles.json`. The GUI also restores the last-used customization on the next launch, and user-created profiles are preserved when built-in presets change.
 - **Profile Safety**: Use **Update Selected** to persist changes to the selected built-in or custom profile. Built-in profiles can be updated but not deleted; **Save as New** creates a separate custom profile. User-created profiles can also be updated or deleted.
 - **Auto-Convert (Watch Mode)**: Continuously monitors the selected input file and re-converts it when saved.
-- **User Guide**: Open the in-app Help button or read [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for control descriptions and workflows.
+- **User Guide**: Open the in-app **Help** view in the sidebar or read [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for control descriptions and workflows.
 
 ---
 
 ## Project Structure
+
+See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) for the architecture, conversion flow, persistent-data locations, packaging details, and AI-assistant maintenance guidance. See [CHANGELOG.md](CHANGELOG.md) for the current working-state release notes.
 
 ```
 md-to-pdf/
@@ -57,6 +59,7 @@ md-to-pdf/
 ├── __main__.py                 # Enables: python . (same as python main.py)
 ├── pyproject.toml              # Package metadata and pytest config
 ├── requirements.txt            # Dependency notes (no PyPI packages needed)
+├── PROJECT_OVERVIEW.md         # Architecture, data flow, packaging, and AI handoff notes
 ├── src/                        # Converter, template, and Lua filter
 ├── assets/fonts/               # Bundled font families
 ├── scripts/                    # Windows and Linux setup/CLI wrappers
@@ -72,7 +75,7 @@ md-to-pdf/
 ## 1. Quick Installation
 
 ### Windows installer
-Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-1.0.0.exe`. The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
+Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-<version>.exe` (currently `PdfCreatorStudio-Setup-1.1.0.exe`). The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
 
 The setup executable installs per-user under `%LOCALAPPDATA%\Programs`, creates Start menu and desktop shortcuts, and uses `winget` or Scoop to install Pandoc and MiKTeX when missing. Dependency installation may request Windows permission or user confirmation. The app's profiles are stored under `%LOCALAPPDATA%\PDF Creator Studio`; generated PDFs go to `Documents\Markdown to PDF`. Uninstalling removes the app and shortcuts but keeps profiles and PDFs. The executable is not code-signed, so Windows SmartScreen may show an unrecognized-app warning when distributing it publicly.
 
@@ -124,13 +127,12 @@ The platform scripts all dispatch to the same Python application, so EPUB suppor
    - Direct: `python main.py`
    - *Legacy Tkinter UI fallback:* `python main.py --legacy-gui`
 2. The modern Flutter/Material 3 studio opens:
-   - **Documents Tab**: Pick single or multiple documents via native dialogs, quick-select project files, and choose custom output filenames/directories.
-   - **Page & Geometry Tab**: Paper sizes (A4, Letter, A5, Mobile 100x160mm, PC), orientation, margin presets, and page border switches.
-   - **Typography Tab**: Bengali (SolaimanLipi, Kalpurush), Arabic (Amiri), English fonts, font sizes, line height multipliers, paragraph spacing, and indent.
-   - **TOC & Numbers Tab**: Table of Contents styling/language and customizable page numbering styles/languages.
-   - **Profiles Tab**: Load built-in profiles (Mobile, PC, Bangla, English, Minimal, Decorative) or save custom profiles.
-   - **Live Log & Execution**: Real-time compilation console with progress tracking, auto-watch mode, and direct "Open Generated PDF" action.
-3. Click **🚀 Convert to PDF**.
+   - **Collapsible sidebar**: Switch between Editor, Documents, nested Preferences (page, typography, TOC, profiles), and Help. Collapse it to icons with tooltips.
+   - **Documents view**: Pick single or multiple documents via native dialogs, quick-select project files, and choose custom output filenames/directories.
+   - **Preferences**: Page sizes (A4, Letter, A5, Mobile 100x160mm, PC), orientation, margins, page borders, Bengali/Arabic/English fonts, TOC styling, page numbering, and profiles.
+   - **Profiles**: Load built-in profiles (Mobile, PC, English, Bangla) or save custom profiles.
+   - **Live Log & Execution**: The real-time compilation console appears in Editor and Documents views with progress tracking, auto-watch mode, copy/fold controls, and direct "Open Generated PDF" action.
+3. Click **Convert to PDF** in the title bar (**Export PDF** while the Editor is active).
 4. When finished, use **Open Generated PDF** or **Open Output Folder**.
 
 ---

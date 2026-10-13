@@ -1,9 +1,6 @@
-# Python runtime dependencies for md-to-pdf
-# Modern Material Design 3 UI powered by Flet:
+# Python runtime dependencies for PDF Creator Studio.
 flet>=1.0.3
 
-# (Legacy Tkinter UI is included in Python standard library and requires no pip install)
-#
 # External binary dependencies (installed by scripts/*/setup.*):
 #   - pandoc          https://pandoc.org/
 #   - xelatex         (MiKTeX on Windows, texlive-xetex on Linux)

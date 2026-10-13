@@ -11,7 +11,10 @@ These OFL-licensed fonts were downloaded from the official Google Fonts reposito
 | Della Respira | https://github.com/google/fonts/tree/main/ofl/dellarespira | `OFL-Della-Respira.txt` |
 | Libre Baskerville | https://github.com/google/fonts/tree/main/ofl/librebaskerville | `OFL-Libre-Baskerville.txt` |
 | Playfair Display | https://github.com/google/fonts/tree/main/ofl/playfairdisplay | `OFL-Playfair-Display.txt` |
+| JetBrains Mono | https://github.com/JetBrains/JetBrainsMono | `OFL-JetBrainsMono.txt` |
 
 The directory also contains Baskerville-family files such as `Baskerville-Regular.ttf`. Their embedded family metadata identifies them as Baskerville, but no license provenance is recorded here; verify redistribution rights before distributing those files.
 
 Minion Pro files pre-existed in this project and are not part of these downloads. They are not covered by the OFL notices above; use and redistribution require the applicable commercial license.
+
+MonoLisa trial files may exist in a developer's local working tree, but are ignored by Git and excluded from the Windows installer. The default coding font is JetBrains Mono. MonoLisa can be selected when separately installed and properly licensed on the user's computer.

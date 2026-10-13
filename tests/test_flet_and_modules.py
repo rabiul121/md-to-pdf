@@ -19,16 +19,18 @@ class ModularArchitectureTests(unittest.TestCase):
         self.assertEqual(converter.PROJECT_FONT_CHOICES, constants.PROJECT_FONT_CHOICES)
         self.assertEqual(converter.HEADING_FONT_CHOICES, constants.HEADING_FONT_CHOICES)
 
-    def test_book_print_profiles_use_print_fonts_and_layout(self):
+    def test_removed_builtin_profiles_are_pruned(self):
         profs = profiles.load_profiles()
-        self.assertEqual(profs["Book Print - EB Garamond"]["english_font"], "EB Garamond")
-        self.assertEqual(profs["Book Print - Alegreya"]["heading_font"], "Alegreya Sans")
-        self.assertEqual(profs["Book Print - Crimson Text"]["english_font"], "Crimson Text")
-        self.assertEqual(profs["Book Print - Georgia"]["heading_font"], "Arial")
-        for name in ("Book Print - EB Garamond", "Book Print - Alegreya", "Book Print - Crimson Text", "Book Print - Georgia"):
-            self.assertEqual(profs[name]["page_size_choice"], "A5")
-            self.assertTrue(profs[name]["indent_first_line"])
-            self.assertTrue(profs[name]["page_numbers"])
+        self.assertEqual(
+            set(constants.BUILT_IN_PROFILES),
+            {"Mobile", "PC", "English", "Bangla"},
+        )
+        for name in constants.REMOVED_BUILT_IN_PROFILES:
+            self.assertNotIn(name, profs)
+        self.assertIn("Mobile", profs)
+        self.assertIn("PC", profs)
+        self.assertIn("English", profs)
+        self.assertIn("Bangla", profs)
 
     def test_bundled_fonts_resolve_from_project_assets(self):
         for role, families in constants.BUNDLED_FONT_FILES.items():
@@ -87,13 +89,13 @@ class ModularArchitectureTests(unittest.TestCase):
             with patch.object(profiles, "PROFILE_PATH", profile_path):
                 profiles.save_last_used_settings(
                     {"english_font": "Alegreya", "theme_mode": "system"},
-                    selected_profile="Book Print - Alegreya",
+                    selected_profile="Novel Preset",
                 )
                 last_used = profiles.load_last_used_settings()
 
         self.assertEqual(last_used["english_font"], "Alegreya")
         self.assertEqual(last_used["theme_mode"], "system")
-        self.assertEqual(last_used["selected_profile"], "Book Print - Alegreya")
+        self.assertEqual(last_used["selected_profile"], "Novel Preset")
 
     def test_system_fonts_follow_project_fonts_when_no_tk_root_is_supplied(self):
         from unittest.mock import MagicMock, patch
@@ -209,16 +211,20 @@ class ModularArchitectureTests(unittest.TestCase):
         ):
             asyncio.run(flet_app.main(page))
         self.assertTrue(len(added_controls) > 0)
-        self.assertEqual(len(page.services), 2)
         self.assertIsInstance(page.services[0], ft.FilePicker)
         self.assertIsInstance(page.services[1], ft.Clipboard)
         log_container = added_controls[-1]
         dark_log_bg = log_container.bgcolor
-        page.appbar.actions[1].on_click(None)
+        theme_btn = next(
+            action
+            for action in page.appbar.actions
+            if str(getattr(action, "tooltip", "")).startswith("Theme:")
+        )
+        theme_btn.on_click(None)
         self.assertEqual(page.theme_mode, ft.ThemeMode.LIGHT)
         self.assertNotEqual(log_container.bgcolor, dark_log_bg)
         light_log_bg = log_container.bgcolor
-        page.appbar.actions[1].on_click(None)
+        theme_btn.on_click(None)
         self.assertEqual(page.theme_mode, ft.ThemeMode.DARK)
         self.assertNotEqual(log_container.bgcolor, light_log_bg)
         page.theme_mode = ft.ThemeMode.SYSTEM

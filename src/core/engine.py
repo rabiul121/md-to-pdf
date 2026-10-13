@@ -57,10 +57,18 @@ def find_executable(name):
 def resolve_bundled_font(family, role):
     """Return a fontspec filename/path pair for a bundled family, if available."""
     filename = BUNDLED_FONT_FILES.get(role, {}).get(family)
+    if not filename and role in ("coding", "coading"):
+        alt_role = "coading" if role == "coding" else "coding"
+        filename = BUNDLED_FONT_FILES.get(alt_role, {}).get(family)
     if not filename:
         return None
     font_path = BASE_DIR / "assets" / "fonts" / role / filename
     if not font_path.is_file():
+        alt_role = "coading" if role == "coding" else ("coding" if role == "coading" else None)
+        if alt_role:
+            alt_path = BASE_DIR / "assets" / "fonts" / alt_role / filename
+            if alt_path.is_file():
+                return filename, alt_path.resolve().parent.as_posix() + "/"
         return None
     return filename, font_path.resolve().parent.as_posix() + "/"
 
@@ -120,7 +128,7 @@ def font_style_features(font_selection):
         return None
 
     bold = sibling("Bold")
-    italic = sibling("Italic", "It", "Oblique")
+    italic = sibling("Italic", "It", "Oblique", "RegularItalic")
     bold_italic = sibling("BoldItalic", "BoldIt", "BoldOblique")
     options = [f"BoldFont={{{bold or filename}}}"]
     if not bold:
@@ -282,6 +290,7 @@ def convert_md_to_pdf(
     toc_alignment="Center",
     toc_design="Classic",
     heading_font="DejaVu Sans",
+    code_font="JetBrains Mono",
     hyphenation=True,
     line_height="1.1",
     paragraph_spacing="6pt",
@@ -400,7 +409,7 @@ def convert_md_to_pdf(
         "-V", f"fontsize={fontsize_val}"
     ]
     if highlight_style:
-        cmd.append(f"--highlight-style={highlight_style}")
+        cmd.append(f"--syntax-highlighting={highlight_style}")
 
     if input_format == "plain":
         # Pandoc has no plain-text reader; escaped Markdown keeps text literal.
@@ -419,12 +428,21 @@ def convert_md_to_pdf(
     is_windows = sys.platform.startswith("win")
     bundled_emoji_font = resolve_bundled_font("Segoe UI Emoji", "symbol") if is_windows else resolve_bundled_font("Noto Emoji", "symbol")
     bundled_symbol_font = resolve_bundled_font("Segoe UI Symbol", "symbol") if is_windows else resolve_bundled_font("Noto Sans Symbols 2", "symbol")
+    bundled_mono_font = (
+        resolve_bundled_font(code_font, "coading")
+        or resolve_bundled_font(code_font, "coding")
+        or resolve_bundled_font(code_font, "english")
+        or resolve_font_file(code_font, "coading")
+        or resolve_font_file(code_font, "english")
+        or resolve_bundled_font("JetBrains Mono", "coading")
+    )
     bundled_fonts = {
         "fontenglish": resolve_font_file(english_font, "english"),
         "fontheadinglatin": heading_latin_font,
         "fontheadingbengali": heading_bengali_font,
         "fontbengali": resolve_font_file(bengali_font, "bengali"),
         "fontarabic": resolve_font_file(arabic_font, "arabic"),
+        "fontmono": bundled_mono_font,
         "fontemoji": bundled_emoji_font,
         "fontsymbol": bundled_symbol_font,
         "fontemojiSupplement": resolve_bundled_font("Noto Emoji", "symbol"),
@@ -435,13 +453,14 @@ def convert_md_to_pdf(
             filename, font_path = bundled_font
             font_file_vars[f"{name}file"] = filename
             font_file_vars[f"{name}path"] = font_path
-            if name in {"fontenglish", "fontbengali", "fontarabic"}:
+            if name in {"fontenglish", "fontbengali", "fontarabic", "fontmono"}:
                 font_file_vars[f"{name}features"] = font_style_features(bundled_font)
     template_vars = {
         "fontenglish": english_font,
         "fontheading": heading_font,
         "fontbengali": bengali_font,
         "fontarabic": arabic_font,
+        "fontmono": code_font,
         "fontemoji": "Segoe UI Emoji" if is_windows else "Noto Emoji",
         "fontsymbol": "Segoe UI Symbol" if is_windows else "Noto Sans Symbols 2",
         "fontcurrency": "Segoe UI" if is_windows else english_font,
@@ -551,7 +570,7 @@ def convert_md_to_pdf(
         else:
             log_func(f"[ERROR] Pandoc/XeLaTeX conversion failed (Code {proc.returncode}):")
             if proc.stderr:
-                for line in proc.stderr.strip().splitlines()[-10:]:
+                for line in proc.stderr.strip().splitlines():
                     log_func(f"  {line}")
             return False, proc.stderr
     except Exception as e:

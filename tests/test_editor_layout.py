@@ -19,13 +19,21 @@ class EditorLayoutTests(unittest.TestCase):
         self.page.add = lambda *controls: self.added.extend(controls)
         with patch.object(flet_app, "load_last_used_settings", return_value={}):
             asyncio.run(flet_app.main(self.page))
-        self.tabs = self.added[0]
-        self.editor_tab = self.tabs.content.controls[1].controls[0]
+        self.body = self.added[0]
+        self.sidebar = self.body.controls[0]
+        self.view_holder = self.body.controls[2]
+        self.editor_tab = self.view_holder.content
         self.actions, self.toolbar, self.split = self.editor_tab.content.controls
         self.editor = self.split.controls[0].content
 
     def find_action(self, tooltip):
         return next(control for control in self.actions.controls if control.tooltip == tooltip)
+
+    def navigate(self, key):
+        item = self.find_control(self.sidebar, lambda c: getattr(c, "data", None) == key)
+        self.assertIsNotNone(item, f"Sidebar item {key!r} not found")
+        item.on_click(None)
+        return self.view_holder.content
 
     def find_control(self, root, predicate):
         if predicate(root):
@@ -50,13 +58,16 @@ class EditorLayoutTests(unittest.TestCase):
         self.assertIsNone(self.editor.min_lines)
         self.assertEqual(self.split.vertical_alignment, ft.CrossAxisAlignment.STRETCH)
         self.assertEqual(self.added[-1].height, 48)
-        self.tabs.selected_index = 1
-        self.tabs.on_change(None)
+        self.navigate("documents")
         self.assertEqual(self.added[-1].height, 160)
-        self.tabs.selected_index = 0
-        self.tabs.on_change(None)
+        self.navigate("editor")
         self.assertEqual(self.added[-1].height, 48)
-        self.added[-1].content.controls[0].controls[2].on_click(None)
+        toggle = self.find_control(
+            self.added[-1],
+            lambda c: getattr(c, "tooltip", None) == "Expand conversion log",
+        )
+        self.assertIsNotNone(toggle)
+        toggle.on_click(None)
         self.assertEqual(self.added[-1].height, 160)
 
     def test_preview_updates_on_every_keystroke_and_toolbar_action(self):
@@ -96,8 +107,7 @@ class EditorLayoutTests(unittest.TestCase):
         self.assertEqual(editor.expand, 300)
 
     def test_font_selectors_are_searchable_with_bundled_fonts_first(self):
-        tab_views = self.tabs.content.controls[1]
-        typography = tab_views.controls[3]
+        typography = self.navigate("typography")
         font_dropdowns = []
 
         def collect(control):

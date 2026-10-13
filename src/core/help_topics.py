@@ -1,4 +1,4 @@
-"""Built-in help topics rendered in the Help tab of the Flet application.
+"""Built-in help topics rendered in the Help view of the Flet application.
 
 Each topic is a dict with ``title``, ``summary``, ``keywords`` and a
 ``body`` written in Markdown so it can be rendered by
@@ -18,11 +18,11 @@ HELP_TOPICS = [
                 "files to PDF using Pandoc and XeLaTeX.",
                 "",
                 "1. Install the dependencies with the setup script for your platform.",
-                "2. Open the **Documents** tab and pick a file, or write in the **Editor** tab.",
-                "3. Adjust page, font and TOC options in the other tabs.",
-                "4. Press **Convert to PDF** in the bottom bar.",
+                "2. Open **Documents** in the sidebar and pick a file, or write in the **Editor** view.",
+                "3. Adjust page, font and TOC options under **Preferences** in the sidebar.",
+                "4. Press **Convert to PDF** in the title bar.",
                 "",
-                "Use the **Search** box at the top of this Help tab to find any topic.",
+                "Use the **Search** box at the top of this Help view to find any topic.",
             ]
         ),
     },
@@ -34,7 +34,7 @@ HELP_TOPICS = [
             [
                 "## Document Editor",
                 "",
-                "The **Editor** tab lets you write Markdown or plain text and convert it",
+                "The **Editor** view lets you write Markdown or plain text and convert it",
                 "without creating a file first.",
                 "",
                 "- **Open...** loads an existing `.md`, `.markdown` or `.txt` file.",
@@ -60,7 +60,8 @@ HELP_TOPICS = [
                 "  resize the two panes. Each pane keeps at least 30% of the width.",
                 "- **Expand Editor** toggles the window between a normal and a maximized size.",
                 "- The compact formatting toolbar scrolls horizontally if needed.",
-                "- The conversion log starts collapsed in the Editor tab; its chevron expands it.",
+                "- The conversion log appears only in Editor and Documents views. It starts",
+                "  collapsed in the Editor; use the top-right copy and chevron buttons.",
                 "- Preview supports code blocks, task lists, nested lists, tables and reference links.",
                 "  Code blocks are syntax highlighted and follow the light/dark app theme.",
                 "- Footnotes (`[^note]` and `[^note]: ...`) appear as numbered endnotes.",
@@ -106,10 +107,12 @@ HELP_TOPICS = [
             [
                 "## Help and Search",
                 "",
-                "This tab is the built-in help. The search box filters topics as you type,",
+                "This view is the built-in help. The search box filters topics as you type,",
                 "matching titles, summaries, keywords and body text.",
                 "",
-                "Click a topic on the left to read it on the right. The full manual stays",
+                "Results appear under the search box, even when the Topics pane is collapsed.",
+                "Drag the divider to resize Topics and details, or use the panel button to",
+                "collapse and restore the pane. The full manual stays",
                 "available in `docs/USER_GUIDE.md`.",
             ]
         ),
@@ -174,7 +177,7 @@ HELP_TOPICS = [
             [
                 "## Auto-Convert Watch Mode",
                 "",
-                "Switch the bottom bar to **Auto-Convert (Watch)** and press the convert",
+                "Choose **Auto-Convert (Watch)** in the title bar and press the primary action",
                 "button. The app then re-compiles the selected file every time it changes on",
                 "disk, so you can keep an editor open beside the PDF.",
                 "",
@@ -194,6 +197,7 @@ HELP_TOPICS = [
                 "- **Save as New** stores the current settings under a new name.",
                 "- **Update Selected** overwrites the selected profile.",
                 "- Built-in profiles can be updated but not deleted.",
+                "- The built-in presets are Mobile, PC, English and Bangla.",
             ]
         ),
     },
@@ -208,7 +212,7 @@ HELP_TOPICS = [
                 "- **Pandoc not found**: install Pandoc and restart the app.",
                 "- **XeLaTeX not found**: install MiKTeX or TeX Live with xetex.",
                 "- `.doc` input needs LibreOffice; `.mobi` needs Calibre's `ebook-convert`.",
-                "- Read the **Conversion Log** at the bottom of the window; every failed",
+                "- Read the **Conversion Log** in the Editor or Documents view; every failed",
                 "  run prints the exact command line that was executed.",
             ]
         ),

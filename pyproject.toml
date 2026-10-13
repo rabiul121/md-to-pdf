@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "md-to-pdf"
-version = "1.0.0"
-description = "Multilingual Markdown to PDF converter (Bengali, Arabic, English, Emojis)"
+version = "1.1.0"
+description = "PDF Creator Studio: multilingual Markdown and document to PDF converter"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"

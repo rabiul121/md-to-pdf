@@ -76,12 +76,16 @@ PROJECT_FONT_CHOICES = {
 HEADING_FONT_CHOICES = [
     *PROJECT_FONT_CHOICES["English"], "Helvetica", "Arial", "Baskerville", "Libre Baskerville", "Futura", "Playfair Display",
 ]
+CODING_FONT_CHOICES = [
+    "JetBrains Mono", "DejaVu Sans",
+]
 
 PROFILE_BASE_SETTINGS = {
     "page_size_choice": "A4", "orientation": "Portrait", "margin_choice": "Page default",
     "custom_margin": "25mm", "font_size_choice": "Medium", "custom_font_size": 14,
     "english_font": "DejaVu Sans", "heading_font": "DejaVu Sans",
     "bengali_font": "SolaimanLipi", "arabic_font": "Amiri",
+    "code_font": "JetBrains Mono",
     "page_numbers": False, "page_number_style": "arabic", "page_number_format": "Page 1 of 10",
     "page_number_position": "Middle", "page_number_size": "9pt", "page_number_language": "English",
     "front_page_numbers": False, "front_page_number_style": "roman", "front_page_number_format": "1",
@@ -97,30 +101,27 @@ PROFILE_BASE_SETTINGS = {
 BUILT_IN_PROFILES = {
     "Mobile": {"page_size_choice": "For Mobile", "font_size_choice": "Standard", "line_height": "1.0", "margin_choice": "Page default"},
     "PC": {"page_size_choice": "For PC", "font_size_choice": "Medium", "line_height": "1.15", "margin_choice": "Page default"},
-    "English": {"toc_language": "English", "page_number_language": "English", "english_font": "DejaVu Sans"},
-    "Bangla": {"toc_language": "Bangla", "page_number_language": "Bangla", "bengali_font": "SolaimanLipi"},
-    "Book Print - EB Garamond": {
-        "page_size_choice": "A5", "font_size_choice": "Standard", "english_font": "EB Garamond",
-        "heading_font": "Playfair Display", "margin_choice": "Standard (1 in)", "line_height": "1.15",
-        "indent_first_line": True, "paragraph_spacing": "0pt", "page_numbers": True,
-    },
-    "Book Print - Alegreya": {
-        "page_size_choice": "A5", "font_size_choice": "Standard", "english_font": "Alegreya",
-        "heading_font": "Alegreya Sans", "margin_choice": "Standard (1 in)", "line_height": "1.15",
-        "indent_first_line": True, "paragraph_spacing": "0pt", "page_numbers": True,
-    },
-    "Book Print - Crimson Text": {
-        "page_size_choice": "A5", "font_size_choice": "Standard", "english_font": "Crimson Text",
-        "heading_font": "Baskerville", "margin_choice": "Standard (1 in)", "line_height": "1.15",
-        "indent_first_line": True, "paragraph_spacing": "0pt", "page_numbers": True,
-    },
-    "Book Print - Georgia": {
-        "page_size_choice": "A5", "font_size_choice": "Standard", "english_font": "Georgia",
-        "heading_font": "Arial", "margin_choice": "Standard (1 in)", "line_height": "1.15",
-        "indent_first_line": True, "paragraph_spacing": "0pt", "page_numbers": True,
-    },
-    "Minimal": {"toc_design": "Minimal", "beautify_toc": False, "page_border": False},
-    "Decorative": {"toc_design": "Decorative", "beautify_toc": True, "page_border": True},
+    "English": {"toc_language": "English", "page_number_language": "English", "english_font": "DejaVu Sans", "code_font": "JetBrains Mono"},
+    "Bangla": {"toc_language": "Bangla", "page_number_language": "Bangla", "bengali_font": "SolaimanLipi", "code_font": "JetBrains Mono"},
+}
+
+# Names of built-in profiles that were removed during the UI redesign. Saved
+# overrides for these names are legacy data and are ignored by the loader so
+# they no longer appear next to the four supported built-in presets. Profiles
+# saved under any other custom name remain untouched.
+REMOVED_BUILT_IN_PROFILES = {
+    "Book Print - EB Garamond",
+    "Book Print - Alegreya",
+    "Book Print - Crimson Text",
+    "Book Print - Georgia",
+    "Minimal",
+    "Decorative",
+    "Profile_1",
+    "Custome_1",
+    "Novel Preset",
+    "Georgia-Arial",
+    "Bangla_Update",
+    "Storybook Preset",
 }
 
 BUNDLED_FONT_FILES = {
@@ -148,6 +149,12 @@ BUNDLED_FONT_FILES = {
         "Arial": "Arial-Regular.ttf",
         "Futura": "FuturaLTPro-Book.otf",
         "Playfair Display": "PlayfairDisplay-Variable.ttf",
+    },
+    "coading": {
+        "JetBrains Mono": "JetBrainsMono-VariableFont_wght.ttf",
+    },
+    "coding": {
+        "JetBrains Mono": "JetBrainsMono-VariableFont_wght.ttf",
     },
     "bengali": {
         "SolaimanLipi": "SolaimanLipi-Regular.ttf",
