@@ -83,6 +83,13 @@ async def main(page: ft.Page):
     page.fonts = {
         "JetBrains Mono": (BASE_DIR / "assets" / "fonts" / "english" / "JetBrainsMono-VariableFont_wght.ttf").as_posix(),
     }
+    for family, filename in (
+        ("MonoLisa", "MonoLisa-Regular.ttf"),
+        ("Operator Mono", "OperatorMono-Book.ttf"),
+    ):
+        font_path = BASE_DIR / "assets" / "fonts" / "coading" / filename
+        if font_path.is_file():
+            page.fonts[family] = font_path.as_posix()
 
     def is_light_theme():
         """Resolve System mode against the OS brightness for code palettes."""

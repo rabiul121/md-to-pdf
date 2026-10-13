@@ -77,7 +77,7 @@ HEADING_FONT_CHOICES = [
     *PROJECT_FONT_CHOICES["English"], "Helvetica", "Arial", "Baskerville", "Libre Baskerville", "Futura", "Playfair Display",
 ]
 CODING_FONT_CHOICES = [
-    "JetBrains Mono", "DejaVu Sans",
+    "JetBrains Mono", "MonoLisa", "Operator Mono", "DejaVu Sans",
 ]
 
 PROFILE_BASE_SETTINGS = {
@@ -152,9 +152,13 @@ BUNDLED_FONT_FILES = {
     },
     "coading": {
         "JetBrains Mono": "JetBrainsMono-VariableFont_wght.ttf",
+        "MonoLisa": "MonoLisa-Regular.ttf",
+        "Operator Mono": "OperatorMono-Book.ttf",
     },
     "coding": {
         "JetBrains Mono": "JetBrainsMono-VariableFont_wght.ttf",
+        "MonoLisa": "MonoLisa-Regular.ttf",
+        "Operator Mono": "OperatorMono-Book.ttf",
     },
     "bengali": {
         "SolaimanLipi": "SolaimanLipi-Regular.ttf",

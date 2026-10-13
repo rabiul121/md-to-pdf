@@ -41,10 +41,15 @@ New-Item -ItemType Directory -Path $PackAssets -Force | Out-Null
 New-Item -ItemType Directory -Path $StageDir -Force | Out-Null
 New-Item -ItemType Directory -Path (Split-Path -Parent $InstallerOutput) -Force | Out-Null
 
-# Package project assets from a staging copy so locally installed trial fonts
-# are never redistributed by the application installer.
+# Package project assets from a staging copy. Licensed MonoLisa and Operator
+# Mono files are included; trial text faces and the separate Operator family
+# are not part of this installer.
 Copy-Item -Path (Join-Path $RepoRoot "assets\*") -Destination $PackAssets -Recurse -Force
-Get-ChildItem -LiteralPath $PackAssets -Recurse -File -Filter "MonoLisa*" |
+Get-ChildItem -LiteralPath $PackAssets -Recurse -File |
+    Where-Object {
+        $_.Name -like "MonoLisaTextTrial*" -or $_.Name -like "MonoLisaCodeTrial*" -or
+        $_.Name -like "Operator-*.ttf"
+    } |
     Remove-Item -Force
 
 Write-Host "Packaging the Flet desktop app..." -ForegroundColor Cyan

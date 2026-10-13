@@ -95,5 +95,5 @@ Building the setup executable requires a Windows host, a working project virtual
 - `src/core/engine.py` and `src/converter.py` contain overlapping conversion code and can drift.
 - The Windows installer depends on externally installed Pandoc and MiKTeX; their first-run setup and update behavior should be checked on a clean Windows account.
 - Packaged-app and cross-platform conversion smoke checks should be automated on Windows and Linux CI.
-- Font provenance/licensing needs to be documented for every bundled font, especially non-OFL commercial families. Locally supplied MonoLisa trial fonts are ignored by Git and excluded from packaged builds; JetBrains Mono is the redistributable coding-font default.
+- Font provenance/licensing needs to be documented for every bundled font, especially non-OFL commercial families. The licensed MonoLisa and Operator Mono coding-font files are tracked and included in the Windows installer; the separate MonoLisa Text trial files and proportional Operator family are excluded. JetBrains Mono remains the redistributable default.
 - A signed Windows installer would improve trust and reduce SmartScreen friction.

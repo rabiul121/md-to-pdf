@@ -17,4 +17,4 @@ The directory also contains Baskerville-family files such as `Baskerville-Regula
 
 Minion Pro files pre-existed in this project and are not part of these downloads. They are not covered by the OFL notices above; use and redistribution require the applicable commercial license.
 
-MonoLisa trial files may exist in a developer's local working tree, but are ignored by Git and excluded from the Windows installer. The default coding font is JetBrains Mono. MonoLisa can be selected when separately installed and properly licensed on the user's computer.
+MonoLisa and Operator Mono coding-font files are provided under the project's applicable commercial licenses in `assets/fonts/coading/`; these licensed files are tracked and bundled by the Windows installer. Do not add the separate MonoLisa Text trial files or the proportional `Operator-*.ttf` family to a release. JetBrains Mono remains the default coding font.

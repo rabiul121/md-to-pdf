@@ -140,6 +140,11 @@ BUNDLED_FONT_FILES = {
         "Futura": "FuturaLTPro-Book.otf",
         "Playfair Display": "PlayfairDisplay-Variable.ttf",
     },
+    "coading": {
+        "JetBrains Mono": "JetBrainsMono-VariableFont_wght.ttf",
+        "MonoLisa": "MonoLisa-Regular.ttf",
+        "Operator Mono": "OperatorMono-Book.ttf",
+    },
     "bengali": {
         "SolaimanLipi": "SolaimanLipi-Regular.ttf",
         "Noto Sans Bengali": "NotoSansBengali-VariableFont_wdth,wght.ttf",

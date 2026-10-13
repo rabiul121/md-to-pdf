@@ -75,7 +75,7 @@ md-to-pdf/
 ## 1. Quick Installation
 
 ### Windows installer
-Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-<version>.exe` (currently `PdfCreatorStudio-Setup-1.1.0.exe`). The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
+Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-<version>.exe` (currently `PdfCreatorStudio-Setup-1.1.1.exe`). Share that single setup `.exe` with Windows users; the wheel and source archive are Python package artifacts, not desktop installers. The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
 
 The setup executable installs per-user under `%LOCALAPPDATA%\Programs`, creates Start menu and desktop shortcuts, and uses `winget` or Scoop to install Pandoc and MiKTeX when missing. Dependency installation may request Windows permission or user confirmation. The app's profiles are stored under `%LOCALAPPDATA%\PDF Creator Studio`; generated PDFs go to `Documents\Markdown to PDF`. Uninstalling removes the app and shortcuts but keeps profiles and PDFs. The executable is not code-signed, so Windows SmartScreen may show an unrecognized-app warning when distributing it publicly.
 

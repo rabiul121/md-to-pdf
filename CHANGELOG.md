@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 — Licensed Coding Fonts
+
+- Added MonoLisa and Operator Mono as code-font choices and bundled the licensed font files in the Windows installer.
+- Kept the separate proportional Operator family and MonoLisa Text trial files out of the release package.
+
 ## 1.1.0 — Working State
 
 - Reworked the Flet interface with a collapsible navigation sidebar and view-scoped conversion log.
