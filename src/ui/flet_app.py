@@ -1203,7 +1203,9 @@ async def main(page: ft.Page):
         hint_text="Paste or type Markdown or plain text here, then convert it directly to PDF.",
         text_style=ft.TextStyle(font_family="monospace"),
         text_size=14,
-        text_vertical_align=ft.Alignment.TOP_LEFT,
+        # TextField expects a VerticalAlignment value here. A 2D Alignment
+        # object can break the Flutter field and make the editor appear disabled.
+        text_vertical_align=ft.VerticalAlignment.START,
         border={
             ft.ControlState.DEFAULT: ft.OutlineInputBorder(
                 border_radius=8,
