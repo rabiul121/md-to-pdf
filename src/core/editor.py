@@ -135,6 +135,23 @@ def ordered_list_producer():
     return producer
 
 
+def task_list_producer():
+    """Toggle Markdown task-list markers on the selected lines."""
+    exact = re.compile(r"\A- \[[ xX]\] ")
+
+    def producer(value, start, end):
+        return toggle_line_markers(
+            value,
+            start,
+            end,
+            exact,
+            LIST_MARKER_PATTERN,
+            lambda _number: "- [ ] ",
+        )
+
+    return producer
+
+
 def quote_producer():
     """Toggle a block quote marker on the selected lines."""
     exact = re.compile(r"\A> ")

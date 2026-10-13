@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 — Editor Improvements
+
+- Set the Markdown editor text and initial caret to the top-left/start of the input area.
+- Added editor Undo and Redo toolbar buttons with selection restoration and a bounded 200-step history.
+- Added formatting buttons for heading levels 4–6 and Markdown task lists.
+
 ## 1.1.1 — Licensed Coding Fonts
 
 - Added MonoLisa and Operator Mono as code-font choices and bundled the licensed font files in the Windows installer.

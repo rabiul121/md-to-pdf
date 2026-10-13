@@ -75,7 +75,7 @@ md-to-pdf/
 ## 1. Quick Installation
 
 ### Windows installer
-Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-<version>.exe` (currently `PdfCreatorStudio-Setup-1.1.1.exe`). Share that single setup `.exe` with Windows users; the wheel and source archive are Python package artifacts, not desktop installers. The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
+Run `scripts\windows\installer\Build-Installer.ps1` from PowerShell on a Windows build machine to create `dist\PdfCreatorStudio-Setup-<version>.exe` (currently `PdfCreatorStudio-Setup-1.1.2.exe`). Share that single setup `.exe` with Windows users; the wheel and source archive are Python package artifacts, not desktop installers. The build machine needs Python, this project's requirements, PyInstaller (the script installs it into `.venv` if needed), and the .NET Framework C# compiler.
 
 The setup executable installs per-user under `%LOCALAPPDATA%\Programs`, creates Start menu and desktop shortcuts, and uses `winget` or Scoop to install Pandoc and MiKTeX when missing. Dependency installation may request Windows permission or user confirmation. The app's profiles are stored under `%LOCALAPPDATA%\PDF Creator Studio`; generated PDFs go to `Documents\Markdown to PDF`. Uninstalling removes the app and shortcuts but keeps profiles and PDFs. The executable is not code-signed, so Windows SmartScreen may show an unrecognized-app warning when distributing it publicly.
 
@@ -128,6 +128,7 @@ The platform scripts all dispatch to the same Python application, so EPUB suppor
    - *Legacy Tkinter UI fallback:* `python main.py --legacy-gui`
 2. The modern Flutter/Material 3 studio opens:
    - **Collapsible sidebar**: Switch between Editor, Documents, nested Preferences (page, typography, TOC, profiles), and Help. Collapse it to icons with tooltips.
+   - **Editor**: Top-aligned Markdown input with a live preview, undo/redo, and formatting controls for headings 1–6, lists, tasks, quotes, code, and links.
    - **Documents view**: Pick single or multiple documents via native dialogs, quick-select project files, and choose custom output filenames/directories.
    - **Preferences**: Page sizes (A4, Letter, A5, Mobile 100x160mm, PC), orientation, margins, page borders, Bengali/Arabic/English fonts, TOC styling, page numbering, and profiles.
    - **Profiles**: Load built-in profiles (Mobile, PC, English, Bangla) or save custom profiles.

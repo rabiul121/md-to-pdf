@@ -22,7 +22,7 @@ Supported input extensions are `.md`, `.markdown`, `.txt`, `.doc`, `.docx`, `.ep
 The **Editor** view (the first sidebar item) lets you write or paste Markdown or plain text and convert it to PDF directly, without creating a file first.
 
 1. Paste or type your content into the editor.
-2. Use the toolbar to apply Markdown formatting: bold, italic, strikethrough, headings 1-3, bulleted and numbered lists, block quotes, inline code, code blocks, links, and horizontal rules. Select text first, or place the cursor and click a button to insert a ready-to-type placeholder.
+2. Use the toolbar to undo or redo edits, or apply Markdown formatting: bold, italic, strikethrough, headings 1-6, bulleted, numbered, and task lists, block quotes, inline code, code blocks, links, and horizontal rules. Select text first, or place the cursor and click a button to insert a ready-to-type placeholder. Undo history keeps the latest 200 editor changes and resets when you open another document or clear the editor.
 3. **Format** switches between Markdown and Plain Text. Plain Text converts your words literally with no Markdown parsing and disables the formatting toolbar.
 4. **Open...** loads an existing `.md`, `.markdown`, or `.txt` file into the editor.
 5. **Save** writes the document to its current file. **Save As...** saves the buffer to a new location. The status line next to the save buttons shows the current file and warns about unsaved changes.
@@ -31,7 +31,7 @@ The **Editor** view (the first sidebar item) lets you write or paste Markdown or
 8. The expand icon in the editor's top-right cluster toggles the window between a normal and a maximized size, giving the editor more room.
 9. **Export PDF** converts the buffer using all settings from the other views. It appears both in the editor row and as the primary action in the title bar while the Editor is active. A document loaded from disk is saved first so relative image paths keep resolving; an unsaved buffer is converted from a temporary file, so use **Save As...** if you want to keep your work.
 
-The editor uses a compact icon-based file row and a single-line formatting toolbar (scroll horizontally if needed). Hover over an icon to see its action. The conversion log is available only in the Editor and Documents views; it starts collapsed in the Editor to leave more room for writing. Use the copy and chevron buttons in the top-right of the editor row to copy or expand it. The preview is not a PDF page-layout preview; exported pagination and typography still follow the conversion settings.
+The editor text starts at the top-left of the writing area. The editor uses a compact icon-based file row and a single-line formatting toolbar (scroll horizontally if needed). Hover over an icon to see its action. The conversion log is available only in the Editor and Documents views; it starts collapsed in the Editor to leave more room for writing. Use the copy and chevron buttons in the top-right of the editor row to copy or expand it. The preview is not a PDF page-layout preview; exported pagination and typography still follow the conversion settings.
 
 ## Help
 

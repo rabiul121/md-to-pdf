@@ -52,6 +52,7 @@ from src.core.editor import (
     ordered_list_producer,
     quote_producer,
     strikethrough_producer,
+    task_list_producer,
 )
 from src.core.markdown_preview import markdown_to_controls
 from src.core.help_topics import HELP_TOPICS, search_help_topics
@@ -924,6 +925,13 @@ async def main(page: ft.Page):
     editor_file_path = [None]
     editor_dirty = [False]
     last_editor_selection = [None]
+    editor_saved_content = [""]
+    editor_undo_stack = []
+    editor_redo_stack = []
+    editor_history_current = [{"text": "", "start": 0, "end": 0}]
+    editor_history_limit = 200
+    editor_undo_button = [None]
+    editor_redo_button = [None]
     format_buttons = []
     # Editor/preview split: the editor takes ``editor_flex`` of the row and the
     # preview pane (when visible) takes the rest. The divider in between is
@@ -943,16 +951,84 @@ async def main(page: ft.Page):
             editor_status.value = f"{name}  |  {mode}"
             editor_status.color = ft.Colors.GREY_400
 
+    def capture_editor_snapshot():
+        value = editor_field.value or ""
+        selection = editor_field.selection
+        if selection is not None:
+            start, end = selection.start, selection.end
+        elif last_editor_selection[0] is not None:
+            start, end = last_editor_selection[0]
+        else:
+            start = end = 0
+        return {"text": value, "start": start, "end": end}
+
+    def refresh_history_buttons():
+        if editor_undo_button[0] is not None:
+            editor_undo_button[0].disabled = not editor_undo_stack
+        if editor_redo_button[0] is not None:
+            editor_redo_button[0].disabled = not editor_redo_stack
+
+    def push_editor_undo_snapshot(previous_snapshot):
+        editor_undo_stack.append(previous_snapshot.copy())
+        if len(editor_undo_stack) > editor_history_limit:
+            del editor_undo_stack[0]
+        editor_redo_stack.clear()
+        refresh_history_buttons()
+
+    def record_editor_change(previous_snapshot):
+        current = editor_field.value or ""
+        if previous_snapshot["text"] == current:
+            return False
+        push_editor_undo_snapshot(previous_snapshot)
+        editor_history_current[0] = capture_editor_snapshot()
+        return True
+
+    def reset_editor_history():
+        editor_undo_stack.clear()
+        editor_redo_stack.clear()
+        editor_history_current[0] = capture_editor_snapshot()
+        last_editor_selection[0] = (
+            editor_history_current[0]["start"], editor_history_current[0]["end"]
+        )
+        refresh_history_buttons()
+
+    def restore_editor_snapshot(snapshot):
+        editor_field.value = snapshot["text"]
+        editor_field.selection = ft.TextSelection(snapshot["start"], snapshot["end"])
+        last_editor_selection[0] = (snapshot["start"], snapshot["end"])
+        editor_history_current[0] = snapshot.copy()
+        editor_dirty[0] = (editor_field.value or "") != editor_saved_content[0]
+        refresh_editor_status()
+        refresh_history_buttons()
+        refresh_preview()
+        page.run_task(editor_field.focus)
+        page.update()
+
+    def undo_editor_change(_e=None):
+        if not editor_undo_stack:
+            return
+        editor_redo_stack.append(capture_editor_snapshot())
+        restore_editor_snapshot(editor_undo_stack.pop())
+
+    def redo_editor_change(_e=None):
+        if not editor_redo_stack:
+            return
+        editor_undo_stack.append(capture_editor_snapshot())
+        restore_editor_snapshot(editor_redo_stack.pop())
+
     def handle_editor_change(_e):
-        if not editor_dirty[0]:
-            editor_dirty[0] = True
-            refresh_editor_status()
+        record_editor_change(editor_history_current[0])
+        editor_dirty[0] = (editor_field.value or "") != editor_saved_content[0]
+        refresh_editor_status()
         refresh_preview()
         page.update()
 
     def handle_selection_change(e):
         try:
             last_editor_selection[0] = (e.selection.start, e.selection.end)
+            if editor_history_current[0]["text"] == (editor_field.value or ""):
+                editor_history_current[0]["start"] = e.selection.start
+                editor_history_current[0]["end"] = e.selection.end
         except AttributeError:
             last_editor_selection[0] = None
 
@@ -976,12 +1052,18 @@ async def main(page: ft.Page):
         if start > end:
             start, end = end, start
         new_value, new_start, new_end = producer(value, start, end)
+        previous_snapshot = editor_history_current[0].copy()
         editor_field.value = new_value
         editor_field.selection = ft.TextSelection(new_start, new_end)
         last_editor_selection[0] = (new_start, new_end)
-        if not editor_dirty[0]:
-            editor_dirty[0] = True
-            refresh_editor_status()
+        if new_value != value:
+            push_editor_undo_snapshot(previous_snapshot)
+        editor_history_current[0] = {
+            "text": new_value, "start": new_start, "end": new_end
+        }
+        editor_dirty[0] = new_value != editor_saved_content[0]
+        refresh_editor_status()
+        refresh_history_buttons()
         page.run_task(editor_field.focus)
         refresh_preview()
         page.update()
@@ -1016,6 +1098,7 @@ async def main(page: ft.Page):
             append_log(f"[ERROR] Could not save the editor document: {error}")
             return False
         editor_dirty[0] = False
+        editor_saved_content[0] = editor_field.value or ""
         refresh_editor_status()
         append_log(f"[EDITOR] Saved '{Path(editor_file_path[0]).name}'.")
         page.update()
@@ -1060,14 +1143,17 @@ async def main(page: ft.Page):
             append_log(f"[ERROR] Could not open '{path}': {error}")
             return
         editor_field.value = content
-        editor_field.selection = None
+        editor_field.selection = ft.TextSelection(0, 0)
         editor_file_path[0] = path
         editor_dirty[0] = False
+        editor_saved_content[0] = content
+        reset_editor_history()
         editor_mode_dd.value = (
             "Plain Text" if Path(path).suffix.lower() == ".txt" else "Markdown"
         )
         handle_editor_mode_change(None)
         append_log(f"[EDITOR] Opened '{Path(path).name}' in the editor.")
+        page.run_task(editor_field.focus)
         page.update()
 
     async def execute_editor_conversion(_e=None):
@@ -1113,9 +1199,11 @@ async def main(page: ft.Page):
         fit_parent_size=True,
         expand=True,
         value="",
+        selection=ft.TextSelection(0, 0),
         hint_text="Paste or type Markdown or plain text here, then convert it directly to PDF.",
         text_style=ft.TextStyle(font_family="monospace"),
         text_size=14,
+        text_vertical_align=ft.Alignment.TOP_LEFT,
         border={
             ft.ControlState.DEFAULT: ft.OutlineInputBorder(
                 border_radius=8,
@@ -1277,10 +1365,11 @@ async def main(page: ft.Page):
     # ---------------- Clear / Close current file ----------------
     def _do_clear_editor():
         editor_field.value = ""
-        editor_field.selection = None
+        editor_field.selection = ft.TextSelection(0, 0)
         editor_file_path[0] = None
         editor_dirty[0] = False
-        last_editor_selection[0] = None
+        editor_saved_content[0] = ""
+        reset_editor_history()
         editor_mode_dd.value = "Markdown"
         handle_editor_mode_change(None)
         refresh_editor_status()
@@ -1329,8 +1418,30 @@ async def main(page: ft.Page):
             page.update()
 
 
+    editor_undo_button[0] = ft.IconButton(
+        icon=ft.Icons.UNDO,
+        tooltip="Undo last editor change",
+        icon_size=18,
+        width=32,
+        height=32,
+        style=ft.ButtonStyle(padding=0),
+        disabled=True,
+        on_click=undo_editor_change,
+    )
+    editor_redo_button[0] = ft.IconButton(
+        icon=ft.Icons.REDO,
+        tooltip="Redo editor change",
+        icon_size=18,
+        width=32,
+        height=32,
+        style=ft.ButtonStyle(padding=0),
+        disabled=True,
+        on_click=redo_editor_change,
+    )
     editor_toolbar = ft.Row(
         [
+            editor_undo_button[0],
+            editor_redo_button[0],
             format_button(ft.Icons.FORMAT_BOLD, "Bold", bold_producer()),
             format_button(ft.Icons.FORMAT_ITALIC, "Italic", italic_producer()),
             format_button(
@@ -1341,11 +1452,17 @@ async def main(page: ft.Page):
             format_button(ft.Icons.LOOKS_ONE, "Heading level 1", heading_producer(1)),
             format_button(ft.Icons.LOOKS_TWO, "Heading level 2", heading_producer(2)),
             format_button(ft.Icons.LOOKS_3, "Heading level 3", heading_producer(3)),
+            format_button(ft.Icons.LOOKS_4, "Heading level 4", heading_producer(4)),
+            format_button(ft.Icons.LOOKS_5, "Heading level 5", heading_producer(5)),
+            format_button(ft.Icons.LOOKS_6, "Heading level 6", heading_producer(6)),
             format_button(
                 ft.Icons.FORMAT_LIST_BULLETED, "Bulleted list", bullet_producer()
             ),
             format_button(
                 ft.Icons.FORMAT_LIST_NUMBERED, "Numbered list", ordered_list_producer()
+            ),
+            format_button(
+                ft.Icons.CHECKLIST, "Task list", task_list_producer()
             ),
             format_button(ft.Icons.FORMAT_QUOTE, "Block quote", quote_producer()),
             format_button(ft.Icons.CODE, "Inline code", inline_code_producer()),
