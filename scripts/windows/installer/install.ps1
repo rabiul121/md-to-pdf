@@ -33,6 +33,8 @@ try {
     $ProductVersion = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
 
     $Shell = New-Object -ComObject WScript.Shell
+    $AppIcon = Join-Path $InstallRoot "resources\assets\pdf_icon.ico"
+    $IconLocation = if (Test-Path -LiteralPath $AppIcon) { "$AppIcon,0" } else { "$Executable,0" }
     $Desktop = [Environment]::GetFolderPath("DesktopDirectory")
     $StartMenu = Join-Path ([Environment]::GetFolderPath("Programs")) $AppName
     New-Item -ItemType Directory -Path $StartMenu -Force | Out-Null
@@ -40,9 +42,19 @@ try {
         $Shortcut = $Shell.CreateShortcut($ShortcutPath)
         $Shortcut.TargetPath = $Executable
         $Shortcut.WorkingDirectory = $InstallRoot
-        $Shortcut.IconLocation = "$Executable,0"
+        $Shortcut.IconLocation = $IconLocation
         $Shortcut.Description = "Convert multilingual documents to PDF"
         $Shortcut.Save()
+    }
+
+    $CliExecutable = Join-Path $InstallRoot "PDF Creator Studio CLI.exe"
+    if (Test-Path -LiteralPath $CliExecutable) {
+        $CliShortcut = $Shell.CreateShortcut((Join-Path $StartMenu "$AppName CLI.lnk"))
+        $CliShortcut.TargetPath = $CliExecutable
+        $CliShortcut.Arguments = "--wizard"
+        $CliShortcut.WorkingDirectory = $InstallRoot
+        $CliShortcut.Description = "Batch convert documents with PDF Creator Studio"
+        $CliShortcut.Save()
     }
 
     New-Item -Path $UninstallKey -Force | Out-Null
@@ -50,7 +62,7 @@ try {
     New-ItemProperty -Path $UninstallKey -Name DisplayVersion -Value $ProductVersion -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name Publisher -Value "md-to-pdf" -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $UninstallKey -Name InstallLocation -Value $InstallRoot -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $UninstallKey -Name DisplayIcon -Value "$Executable,0" -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $UninstallKey -Name DisplayIcon -Value $IconLocation -PropertyType String -Force | Out-Null
     $Uninstaller = Join-Path $InstallRoot "scripts\windows\installer\uninstall.ps1"
     New-ItemProperty -Path $UninstallKey -Name UninstallString -Value "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$Uninstaller`"" -PropertyType String -Force | Out-Null
 
