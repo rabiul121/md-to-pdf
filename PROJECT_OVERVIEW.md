@@ -2,6 +2,16 @@
 
 This document is the handoff brief for future maintainers and AI coding assistants. Read it together with `AGENTS.md` if one is later added, `README.md`, and `docs/USER_GUIDE.md`. Treat the source code as authoritative when behavior differs from this description.
 
+## Application branches
+
+The `main` branch retains the Python/Flet application. The `rust` branch
+contains the native Rust desktop app, CLI, Windows installer, and Rust build
+workflow under `rust/`. Both versions use Pandoc and XeLaTeX. The Rust targets
+build on Windows; review `rust/MIGRATION_STATUS.md` on the Rust branch for
+remaining feature and output parity work. Keep shared resources such as
+`src/template.tex`, `src/font_filter.lua`, and the `assets/` directory aligned
+when changing conversion behavior or bundled fonts.
+
 ## Purpose
 
 PDF Creator Studio converts Markdown, plain text, DOCX, legacy DOC, EPUB, and MOBI documents into PDFs. It is a desktop application for Windows and Linux/WSL, with a Flet/Flutter graphical interface and an interactive command-line workflow. Its main differentiators are multilingual text handling (English, Bengali, and Arabic), broad typography and page-layout controls, and a Pandoc/XeLaTeX conversion pipeline.
@@ -32,6 +42,10 @@ The program does not implement a Markdown or PDF engine itself. Pandoc parses an
 | `src/core/markdown_preview.py` | Flet Markdown preview styling plus footnote normalization. |
 | `src/core/images.py` | Pandoc JSON traversal and optional remote-image download/localization. |
 | `src/core/help_topics.py` | Searchable built-in help content. |
+| `rust/src/app.rs` | In-progress native Rust desktop UI, editor, preview, conversion log, and watch workflow. |
+| `rust/src/converter.rs` | In-progress Rust Pandoc/XeLaTeX conversion backend. |
+| `rust/src/config.rs`, `rust/src/profiles.rs` | Rust settings, paths, built-in and persisted profiles. |
+| `rust/src/cli_main.rs` | In-progress Rust command-line converter and wizard. |
 | `src/template.tex` | Pandoc LaTeX template. Keep syntax-highlighting macros compatible with Pandoc's `$highlighting-macros$`; fallback commands belong only in the no-highlighting branch to avoid duplicate LaTeX definitions. |
 | `src/font_filter.lua` | Pandoc Lua filter for script-aware font selection and specialized symbols/emoji. |
 | `assets/fonts/` | Bundled font files organized by script/role. Observe each font's license before redistributing it. |

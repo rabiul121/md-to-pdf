@@ -1,0 +1,42 @@
+[package]
+name = "pdf-creator-studio"
+version = "1.2.0"
+edition = "2024"
+rust-version = "1.95"
+description = "Multilingual Markdown and document to PDF desktop studio"
+license = "MIT"
+
+[[bin]]
+name = "pdf-creator-studio"
+path = "src/main.rs"
+
+[[bin]]
+name = "pdf-creator-studio-cli"
+path = "src/cli_main.rs"
+
+[dependencies]
+anyhow = "1.0"
+arboard = "3.6.1"
+chrono = { version = "0.4", features = ["clock"] }
+clap = { version = "4.5", features = ["derive"] }
+eframe = "0.36.2"
+image = { version = "0.25", default-features = false, features = ["png"] }
+egui_commonmark = { version = "0.25", features = ["better_syntax_highlighting", "fetch"] }
+open = "5.3"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+rfd = "0.15"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+tempfile = "3.20"
+ttf-parser = "0.25.1"
+which = "8.0"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+

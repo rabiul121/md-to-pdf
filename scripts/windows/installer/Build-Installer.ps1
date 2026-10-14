@@ -55,6 +55,7 @@ Get-ChildItem -LiteralPath $PackAssets -Recurse -File |
 Write-Host "Packaging the Flet desktop app..." -ForegroundColor Cyan
 $PackArgs = @(
     "pack", "src/ui/flet_app.py",
+    "--icon", (Join-Path $RepoRoot "assets\pdf_icon.ico"),
     "--name", "PDF Creator Studio",
     "--product-name", "PDF Creator Studio",
     "--file-description", "Multilingual document to PDF converter",
@@ -95,7 +96,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot "install.ps1") -Destination (Joi
 
 Write-Host "Building the per-user self-extracting setup executable..." -ForegroundColor Cyan
 $BootstrapSource = Join-Path $PSScriptRoot "bootstrap.cs"
-& $CSharpCompiler /nologo /target:winexe /out:$InstallerOutput /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll "/resource:$Payload,app-payload.zip" "/resource:$(Join-Path $PSScriptRoot 'install.ps1'),install.ps1" $BootstrapSource
+& $CSharpCompiler /nologo /target:winexe /out:$InstallerOutput "/win32icon:$(Join-Path $RepoRoot 'assets\pdf_icon.ico')" /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll "/resource:$Payload,app-payload.zip" "/resource:$(Join-Path $PSScriptRoot 'install.ps1'),install.ps1" $BootstrapSource
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $InstallerOutput)) {
     throw "The installer bootstrap build failed with exit code $LASTEXITCODE."
 }

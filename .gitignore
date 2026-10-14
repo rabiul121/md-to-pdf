@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 env/
+target/
 build/
 dist/
 .installer-assets-stage/

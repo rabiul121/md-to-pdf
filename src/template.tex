@@ -44,9 +44,9 @@ $if(fontheadinglatinfile)$
   $endif$
 $else$
   $if(boldheadings)$
-\newfontfamily\headinglatinfont[FakeBold=2]{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+\newfontfamily\headinglatinfont[FakeBold=2]{$if(fontheading)$$fontheading$$else$DejaVu Sans$endif$}
   $else$
-\newfontfamily\headinglatinfont{$if(fontenglish)$$fontenglish$$else$DejaVu Sans$endif$}
+\newfontfamily\headinglatinfont{$if(fontheading)$$fontheading$$else$DejaVu Sans$endif$}
   $endif$
 $endif$
 $if(fontheadingbengalifile)$
@@ -175,12 +175,7 @@ $endif$
 \providecommand{\horizontalrule}{%
   {\color{black!20}\hrule height 0.6pt}\vspace{2pt}%
 }
-% Refined footnote separator (subtle, soft rule instead of deep black line)
-\renewcommand{\footnoterule}{%
-  \kern -3pt
-  {\color{black!25}\hrule width 0.25\linewidth height 0.4pt}%
-  \kern 2.6pt
-}
+% Keep LaTeX's standard footnote separator and spacing.
 \makeatother
 
 \usepackage{fancyhdr}

@@ -2,6 +2,8 @@
 
 An automated, cross-platform workflow to convert multilingual Markdown documents (Bengali, Arabic, English, Emojis, Symbols) into professionally formatted PDFs using **Pandoc**, **XeLaTeX**, and a custom **Lua filter**.
 
+> **Two implementations:** `main` keeps the Python/Flet application. The [`rust`](https://github.com/rabiul121/md-to-pdf/tree/rust) branch contains the native Rust desktop/CLI implementation and its own Windows installer. Both use Pandoc and XeLaTeX for PDF generation. The Rust build works, while full feature and output parity remains under review; see [`rust/MIGRATION_STATUS.md`](rust/MIGRATION_STATUS.md) on that branch.
+
 ---
 
 ## Features
@@ -60,6 +62,7 @@ md-to-pdf/
 ├── pyproject.toml              # Package metadata and pytest config
 ├── requirements.txt            # Dependency notes (no PyPI packages needed)
 ├── PROJECT_OVERVIEW.md         # Architecture, data flow, packaging, and AI handoff notes
+├── rust/                       # Native Rust desktop app, CLI, and setup (rust branch)
 ├── src/                        # Converter, template, and Lua filter
 ├── assets/fonts/               # Bundled font families
 ├── scripts/                    # Windows and Linux setup/CLI wrappers
