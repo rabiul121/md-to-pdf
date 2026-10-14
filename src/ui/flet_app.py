@@ -469,61 +469,10 @@ async def main(page: ft.Page):
         "Coding": code_font_dd,
     }
 
-    font_dropdown_roles = {id(dropdown): role for role, dropdown in font_dropdowns.items()}
-    selected_font_values = {}
-    font_search_queries = {}
-
-    def handle_font_focus(e):
-        dropdown = e.control
-        if dropdown.value is not None:
-            selected_font_values[id(dropdown)] = dropdown.value
-        font_search_queries[id(dropdown)] = ""
-        # Clear the selected label so the first keystroke starts a fresh query
-        # (Flet's editable dropdown otherwise appends to the current value).
-        dropdown.value = None
-        page.update()
-
-    def handle_font_text_change(e):
-        dropdown = e.control
-        query = (e.data if e.data is not None else dropdown.text or "").strip()
-        font_search_queries[id(dropdown)] = query
-        role = font_dropdown_roles.get(id(dropdown))
-        if not role or not query:
-            return
-        folded = query.casefold()
-        exact = next(
-            (family for family in font_families[role] if family.casefold() == folded),
-            None,
-        )
-        if exact and dropdown.value != exact:
-            dropdown.value = exact
-            selected_font_values[id(dropdown)] = exact
-            page.update()
-
-    def handle_font_blur(e):
-        dropdown = e.control
-        if dropdown.value is not None:
-            return
-        query = font_search_queries.get(id(dropdown), "").strip().casefold()
-        role = font_dropdown_roles.get(id(dropdown))
-        exact = (
-            next(
-                (family for family in font_families[role] if family.casefold() == query),
-                None,
-            )
-            if role and query
-            else None
-        )
-        dropdown.value = exact or selected_font_values.get(id(dropdown))
-        font_search_queries[id(dropdown)] = ""
-        page.update()
-
     def handle_font_select(e):
         dropdown = e.control
-        value = e.data if e.data is not None else dropdown.value
-        dropdown.value = value
-        selected_font_values[id(dropdown)] = value
-        font_search_queries[id(dropdown)] = ""
+        if e.data is not None:
+            dropdown.value = e.data
 
     for font_dropdown in font_dropdowns.values():
         font_dropdown.editable = True
@@ -533,9 +482,8 @@ async def main(page: ft.Page):
         font_dropdown.hint_text = "Type to search fonts"
         font_dropdown.dense = True
         font_dropdown.menu_height = 280
-        font_dropdown.on_focus = handle_font_focus
-        font_dropdown.on_blur = handle_font_blur
-        font_dropdown.on_text_change = handle_font_text_change
+        # Let Flet own editable-dropdown search state. Mutating ``value`` while
+        # the user types rebuilds the menu and can move its scroll position.
         font_dropdown.on_select = handle_font_select
 
     font_size_dd = ft.Dropdown(
