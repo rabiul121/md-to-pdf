@@ -1059,6 +1059,21 @@ async def main(page: ft.Page):
         refresh_preview()
         page.update()
 
+    async def restore_editor_focus_and_selection(expected_text, start, end):
+        # Keyboard shortcuts arrive through the page-level key handler. Wait a
+        # frame so the TextField can finish its native key handling before
+        # restoring the formatting action's intended selection.
+        await asyncio.sleep(0.05)
+        if (editor_field.value or "") != expected_text:
+            return
+        await editor_field.focus()
+        editor_field.selection = ft.TextSelection(start, end)
+        last_editor_selection[0] = (start, end)
+        if editor_history_current[0]["text"] == expected_text:
+            editor_history_current[0]["start"] = start
+            editor_history_current[0]["end"] = end
+        page.update()
+
     def apply_transform(producer):
         value = editor_field.value or ""
         selection = editor_field.selection
@@ -1083,9 +1098,9 @@ async def main(page: ft.Page):
         editor_dirty[0] = new_value != editor_saved_content[0]
         refresh_editor_status()
         refresh_history_buttons()
-        page.run_task(editor_field.focus)
         refresh_preview()
         page.update()
+        page.run_task(restore_editor_focus_and_selection, new_value, new_start, new_end)
 
     def format_button(icon, tooltip, producer):
         shortcut = {
