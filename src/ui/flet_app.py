@@ -44,6 +44,7 @@ from src.core.editor import (
     bold_producer,
     bullet_producer,
     code_block_producer,
+    continue_markdown_block,
     heading_producer,
     horizontal_rule_producer,
     inline_code_producer,
@@ -1017,7 +1018,25 @@ async def main(page: ft.Page):
         restore_editor_snapshot(editor_redo_stack.pop())
 
     def handle_editor_change(_e):
-        record_editor_change(editor_history_current[0])
+        previous_snapshot = editor_history_current[0].copy()
+        current_value = editor_field.value or ""
+        if editor_mode_dd.value != "Plain Text":
+            selection = editor_field.selection
+            if selection and selection.start == selection.end:
+                caret = selection.start
+            elif previous_snapshot["start"] == previous_snapshot["end"]:
+                caret = previous_snapshot["start"] + 1
+            else:
+                caret = -1
+            continuation = continue_markdown_block(
+                previous_snapshot["text"], current_value, caret
+            )
+            if continuation is not None:
+                current_value, caret = continuation
+                editor_field.value = current_value
+                editor_field.selection = ft.TextSelection(caret, caret)
+                last_editor_selection[0] = (caret, caret)
+        record_editor_change(previous_snapshot)
         editor_dirty[0] = (editor_field.value or "") != editor_saved_content[0]
         refresh_editor_status()
         refresh_preview()
@@ -1069,9 +1088,26 @@ async def main(page: ft.Page):
         page.update()
 
     def format_button(icon, tooltip, producer):
+        shortcut = {
+            "Bold": "Ctrl+B",
+            "Italic": "Ctrl+I",
+            "Strikethrough": "Ctrl+Shift+X",
+            "Heading level 1": "Ctrl+Alt+1",
+            "Heading level 2": "Ctrl+Alt+2",
+            "Heading level 3": "Ctrl+Alt+3",
+            "Heading level 4": "Ctrl+Alt+4",
+            "Heading level 5": "Ctrl+Alt+5",
+            "Heading level 6": "Ctrl+Alt+6",
+            "Bulleted list": "Ctrl+Shift+8",
+            "Numbered list": "Ctrl+Shift+7",
+            "Task list": "Ctrl+Shift+T",
+            "Block quote": "Ctrl+Shift+Q",
+            "Code block": "Ctrl+Shift+C",
+            "Insert link": "Ctrl+K",
+        }.get(tooltip)
         button = ft.IconButton(
             icon=icon,
-            tooltip=tooltip,
+            tooltip=f"{tooltip} ({shortcut})" if shortcut else tooltip,
             icon_size=18,
             width=32,
             height=32,
@@ -1155,6 +1191,48 @@ async def main(page: ft.Page):
         append_log(f"[EDITOR] Opened '{Path(path).name}' in the editor.")
         page.run_task(editor_field.focus)
         page.update()
+
+    def handle_editor_shortcut(e):
+        """Route common file and Markdown shortcuts while the editor is active."""
+        if active_view[0] != "editor" or not (e.ctrl or e.meta):
+            return
+        key = (e.key or "").lower()
+        if key.startswith("key"):
+            key = key[3:]
+        if key == "s":
+            page.run_task(handle_save_as if e.shift else handle_save_click, None)
+        elif key == "o" and not e.shift:
+            page.run_task(handle_open_in_editor, None)
+        elif key == "z" and not e.shift:
+            undo_editor_change()
+        elif key == "y" or (key == "z" and e.shift):
+            redo_editor_change()
+        elif key == "b" and not e.shift:
+            apply_transform(bold_producer())
+        elif key == "i" and not e.shift:
+            apply_transform(italic_producer())
+        elif key == "k" and not e.shift:
+            apply_transform(link_producer())
+        elif key == "x" and e.shift:
+            apply_transform(strikethrough_producer())
+        elif key == "c" and e.shift:
+            apply_transform(code_block_producer())
+        elif key in {"`", "backquote"}:
+            apply_transform(inline_code_producer())
+        elif key == "t" and e.shift:
+            apply_transform(task_list_producer())
+        elif key == "q" and e.shift:
+            apply_transform(quote_producer())
+        elif key in {"7", "&"} and e.shift:
+            apply_transform(ordered_list_producer())
+        elif key in {"8", "*"} and e.shift:
+            apply_transform(bullet_producer())
+        elif key == "enter" and not e.shift:
+            page.run_task(execute_editor_conversion, None)
+        elif e.alt and key in {"1", "2", "3", "4", "5", "6"}:
+            apply_transform(heading_producer(int(key)))
+
+    page.on_keyboard_event = handle_editor_shortcut
 
     async def execute_editor_conversion(_e=None):
         content = editor_field.value or ""
@@ -1491,15 +1569,17 @@ async def main(page: ft.Page):
                     [
                         ft.IconButton(
                             icon=ft.Icons.FILE_OPEN,
-                            tooltip="Open document",
+                            tooltip="Open document (Ctrl+O)",
                             on_click=handle_open_in_editor,
                         ),
                         ft.IconButton(
-                            icon=ft.Icons.SAVE, tooltip="Save", on_click=handle_save_click
+                            icon=ft.Icons.SAVE,
+                            tooltip="Save (Ctrl+S)",
+                            on_click=handle_save_click,
                         ),
                         ft.IconButton(
                             icon=ft.Icons.SAVE_AS,
-                            tooltip="Save As...",
+                            tooltip="Save As... (Ctrl+Shift+S)",
                             on_click=handle_save_as,
                         ),
                         ft.IconButton(

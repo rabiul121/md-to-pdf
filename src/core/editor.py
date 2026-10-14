@@ -11,6 +11,57 @@ import string
 HEADING_PATTERN = re.compile(r"\A#{1,6}\s+")
 LIST_MARKER_PATTERN = re.compile(r"\A(?:[-*+] |\d+\. )")
 QUOTE_PATTERN = re.compile(r"\A> ?")
+AUTO_CONTINUE_PATTERN = re.compile(
+    r"\A(?P<indent>[ \t]*)(?:(?P<task>[-*+] \[[ xX]\] )|(?P<bullet>[-*+] )|(?P<number>\d+\. )|(?P<quote>> ?))(?P<body>.*)\Z"
+)
+
+
+def continue_markdown_block(previous, current, caret):
+    """Continue a Markdown list or quote after an Enter key insertion.
+
+    Returns ``(new_text, new_caret)`` when the current edit consists of a
+    single inserted newline and the caret is immediately after it; otherwise
+    returns ``None`` so normal typing is left untouched.
+    """
+    if len(current) != len(previous) + 1:
+        return None
+    prefix = 0
+    limit = min(len(previous), len(current))
+    while prefix < limit and previous[prefix] == current[prefix]:
+        prefix += 1
+    if current[prefix:prefix + 1] != "\n":
+        return None
+    if previous[prefix:] != current[prefix + 1:]:
+        return None
+    newline_caret = prefix + 1
+    if caret != newline_caret:
+        return None
+
+    line_start = current.rfind("\n", 0, prefix) + 1
+    previous_line = current[line_start:prefix]
+    match = AUTO_CONTINUE_PATTERN.match(previous_line)
+    if not match:
+        return None
+
+    body = match.group("body")
+    if not body.strip():
+        # Enter on a marker-only line exits the list/quote cleanly.
+        updated = current[:line_start] + current[prefix:]
+        return updated, line_start
+
+    indent = match.group("indent")
+    if match.group("task"):
+        marker = "- [ ] "
+    elif match.group("bullet"):
+        marker = match.group("bullet")
+    elif match.group("number"):
+        number = int(match.group("number").strip()[:-1]) + 1
+        marker = f"{number}. "
+    else:
+        marker = match.group("quote")
+    continuation = indent + marker
+    updated = current[:newline_caret] + continuation + current[newline_caret:]
+    return updated, newline_caret + len(continuation)
 
 
 def escape_plain_text(text):
